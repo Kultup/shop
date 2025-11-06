@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Сторінку не знайдено{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-3xl shadow-2xl border-4 border-yellow-300 p-12 max-w-2xl">
+        <div class="text-9xl mb-6">🎈</div>
+        <h1 class="text-6xl font-bold text-purple-900 mb-4">404</h1>
+        <h2 class="text-3xl font-bold text-purple-700 mb-6">Сторінку не знайдено! 😢</h2>
+        <p class="text-xl text-purple-600 mb-8">Схоже, що ця іграшка загубилася! Спробуйте знайти її в каталозі.</p>
+        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all font-bold text-xl">
+            🏠 Повернутися на головну
+        </a>
+    </div>
+</div>
+{% endblock %}
+

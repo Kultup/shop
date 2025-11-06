@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Панель управління - Адмін-панель{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Панель управління</h1>
+    <p class="text-gray-600 text-sm sm:text-base">Огляд статистики та активності інтернет-магазину</p>
+</div>
+
+<!-- Основна статистика -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-gray-600 text-xs sm:text-sm font-medium">Всього товарів</h3>
+        </div>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ total_products }}</p>
+        <a href="{{ url_for('admin.products') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline">Переглянути →</a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-gray-600 text-xs sm:text-sm font-medium">Всього замовлень</h3>
+        </div>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ total_orders }}</p>
+        <a href="{{ url_for('admin.orders') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline">Переглянути →</a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-gray-600 text-xs sm:text-sm font-medium">Очікують обробки</h3>
+        </div>
+        <p class="text-2xl sm:text-3xl font-bold text-yellow-600 mb-1">{{ pending_orders }}</p>
+        <a href="{{ url_for('admin.orders') }}?status=pending" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline">Обробити →</a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-gray-600 text-xs sm:text-sm font-medium">Користувачів</h3>
+        </div>
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{{ total_users }}</p>
+        <p class="text-xs sm:text-sm text-gray-500">Зареєстровано</p>
+    </div>
+</div>
+
+<!-- Додаткова статистика -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Обробляються</h3>
+        <p class="text-xl sm:text-2xl font-bold text-blue-600">{{ processing_orders }}</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Завершено</h3>
+        <p class="text-xl sm:text-2xl font-bold text-green-600">{{ completed_orders }}</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Скасовано</h3>
+        <p class="text-xl sm:text-2xl font-bold text-red-600">{{ cancelled_orders }}</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-gray-600 text-xs sm:text-sm font-medium mb-2">За останні 7 днів</h3>
+        <p class="text-xl sm:text-2xl font-bold text-gray-900">{{ recent_orders }}</p>
+    </div>
+</div>
+
+<!-- Графіки статистики -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <!-- Графік замовлень за останні 30 днів -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Замовлення за останні 30 днів</h2>
+        <canvas id="ordersChart" style="max-height: 300px;"></canvas>
+    </div>
+    
+    <!-- Графік продажів за останні 7 днів -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Продажі за останні 7 днів</h2>
+        <canvas id="salesChart" style="max-height: 300px;"></canvas>
+    </div>
+</div>
+
+<!-- Основні секції -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+    <!-- Останні замовлення -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900">Останні замовлення</h2>
+            <a href="{{ url_for('admin.orders') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline">Всі →</a>
+        </div>
+        <div class="overflow-x-auto">
+            {% if latest_orders %}
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">ID</th>
+                            <th class="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Користувач</th>
+                            <th class="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Статус</th>
+                            <th class="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in latest_orders %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-700">{{ order.user.username }}</td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium
+                                        {% if order.status == 'completed' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {% if order.status == 'pending' %}Очікує
+                                        {% elif order.status == 'processing' %}Обробляється
+                                        {% elif order.status == 'completed' %}Завершено
+                                        {% elif order.status == 'cancelled' %}Скасовано
+                                        {% else %}{{ order.status }}{% endif %}
+                                    </span>
+                                </td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-right text-xs sm:text-sm">
+                                    <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" class="text-blue-600 hover:text-blue-800 hover:underline">Деталі</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="px-4 sm:px-6 py-8 text-center text-gray-500 text-sm sm:text-base">Немає замовлень</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Останні товари -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900">Останні товари</h2>
+            <a href="{{ url_for('admin.products') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline">Всі →</a>
+        </div>
+        <div class="overflow-x-auto">
+            {% if latest_products %}
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Товар</th>
+                            <th class="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Категорія</th>
+                            <th class="px-3 sm:px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for product in latest_products %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-3 sm:px-4 py-3">
+                                    <div class="text-xs sm:text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                </td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+                                    {% if product.category_obj %}
+                                        <span class="text-xs sm:text-sm text-gray-600">{{ product.category_obj.full_path }}</span>
+                                    {% elif product.category %}
+                                        <span class="text-xs sm:text-sm text-gray-600">{{ product.category }}</span>
+                                    {% else %}
+                                        <span class="text-xs sm:text-sm text-gray-400">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-right text-xs sm:text-sm">
+                                    <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" class="text-blue-600 hover:text-blue-800 hover:underline">Редагувати</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="px-4 sm:px-6 py-8 text-center text-gray-500 text-sm sm:text-base">Немає товарів</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Швидкі посилання та топ товари -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+    <!-- Швидкі посилання -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Швидкі посилання</h2>
+        <div class="space-y-2">
+            <a href="{{ url_for('admin.products') }}" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                <span class="text-sm sm:text-base text-gray-700 group-hover:text-gray-900">Управління товарами</span>
+                <span class="text-blue-600">→</span>
+            </a>
+            <a href="{{ url_for('admin.categories') }}" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                <span class="text-sm sm:text-base text-gray-700 group-hover:text-gray-900">Управління категоріями</span>
+                <span class="text-blue-600">→</span>
+            </a>
+            <a href="{{ url_for('admin.orders') }}" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                <span class="text-sm sm:text-base text-gray-700 group-hover:text-gray-900">Управління замовленнями</span>
+                <span class="text-blue-600">→</span>
+            </a>
+            <a href="{{ url_for('admin.add_product') }}" class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                <span class="text-sm sm:text-base text-gray-700 group-hover:text-gray-900">Додати товар</span>
+                <span class="text-blue-600">→</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Топ товарів -->
+    {% if top_products %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Топ товарів</h2>
+            <ul class="space-y-2">
+                {% for product_name, total_sold in top_products %}
+                    <li class="flex justify-between items-center py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <span class="text-sm sm:text-base text-gray-700 flex-1 truncate mr-2">{{ product_name }}</span>
+                        <span class="font-semibold text-gray-900 text-sm sm:text-base whitespace-nowrap">{{ total_sold }} шт.</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript для графіків -->
+<script>
+    // Графік замовлень за останні 30 днів
+    const ordersCtx = document.getElementById('ordersChart');
+    if (ordersCtx) {
+        const ordersData = {{ orders_by_day | tojson }};
+        new Chart(ordersCtx, {
+            type: 'line',
+            data: {
+                labels: ordersData.map(item => item.date),
+                datasets: [{
+                    label: 'Кількість замовлень',
+                    data: ordersData.map(item => item.count),
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Графік продажів за останні 7 днів
+    const salesCtx = document.getElementById('salesChart');
+    if (salesCtx) {
+        const salesData = {{ sales_by_day | tojson }};
+        new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+                labels: salesData.map(item => item.date),
+                datasets: [{
+                    label: 'Кількість проданих товарів',
+                    data: salesData.map(item => item.quantity),
+                    backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                    borderColor: 'rgb(34, 197, 94)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+

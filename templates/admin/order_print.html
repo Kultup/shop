@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення #{{ order.id }} - Друк</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none; }
+            .print-break { page-break-after: always; }
+            @page { margin: 1cm; }
+        }
+        body { font-family: Arial, sans-serif; }
+    </style>
+</head>
+<body class="bg-white p-8">
+    <!-- Кнопка друку -->
+    <div class="no-print mb-4 text-center">
+        <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">
+            Друкувати
+        </button>
+        <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" class="ml-4 text-blue-600 hover:text-blue-800">
+            Назад
+        </a>
+    </div>
+
+    <!-- Компактний шаблон замовлення -->
+    <div class="max-w-2xl mx-auto">
+        <!-- Заголовок -->
+        <div class="text-center mb-6 border-b-2 border-gray-300 pb-4">
+            <h1 class="text-2xl font-bold text-gray-900">ЗАМОВЛЕННЯ</h1>
+            <p class="text-lg text-gray-600 mt-2">№ {{ order.id }}</p>
+            <p class="text-sm text-gray-500 mt-1">Дата: {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+        </div>
+
+        <!-- Інформація про замовника -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Замовник</h2>
+            <table class="w-full text-sm">
+                <tr>
+                    <td class="py-1 text-gray-600 w-1/3"><strong>Логін:</strong></td>
+                    <td class="py-1 text-gray-900">{{ order.user.username }}</td>
+                </tr>
+                <tr>
+                    <td class="py-1 text-gray-600"><strong>Пошта:</strong></td>
+                    <td class="py-1 text-gray-900">{{ order.user.email }}</td>
+                </tr>
+                {% if order.city %}
+                <tr>
+                    <td class="py-1 text-gray-600"><strong>Місто:</strong></td>
+                    <td class="py-1 text-gray-900">{{ order.city }}</td>
+                </tr>
+                {% endif %}
+                {% if order.institution %}
+                <tr>
+                    <td class="py-1 text-gray-600"><strong>Заклад:</strong></td>
+                    <td class="py-1 text-gray-900">{{ order.institution }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class="py-1 text-gray-600"><strong>Статус:</strong></td>
+                    <td class="py-1">
+                        {% if order.status == 'pending' %}Очікує
+                        {% elif order.status == 'processing' %}Обробляється
+                        {% elif order.status == 'completed' %}Завершено
+                        {% elif order.status == 'cancelled' %}Скасовано
+                        {% else %}{{ order.status }}{% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Товари -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">Товари</h2>
+            <table class="w-full text-sm border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">№</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Назва товару</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700">Категорія</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold text-gray-700">Кількість</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td class="border border-gray-300 px-3 py-2 text-center text-gray-600">{{ loop.index }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-gray-900">{{ item.product.name }}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-gray-600">
+                            {% if item.product.category_obj %}
+                                {{ item.product.category_obj.full_path }}
+                            {% elif item.product.category %}
+                                {{ item.product.category }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="border border-gray-300 px-3 py-2 text-center text-gray-900">{{ item.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Підсумок -->
+        <div class="mt-6 pt-4 border-t-2 border-gray-300 text-right">
+            <p class="text-sm text-gray-600">Всього товарів: <strong class="text-gray-900">{{ order.items|sum(attribute='quantity') }}</strong></p>
+            <p class="text-sm text-gray-600 mt-1">Унікальних позицій: <strong class="text-gray-900">{{ order.items|length }}</strong></p>
+        </div>
+
+        <!-- Підпис -->
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <div class="flex justify-between mt-8">
+                <div class="w-1/2">
+                    <p class="text-sm text-gray-600 mb-8">Підпис замовника:</p>
+                    <div class="border-t border-gray-300"></div>
+                </div>
+                <div class="w-1/2">
+                    <p class="text-sm text-gray-600 mb-8">Підпис виконавця:</p>
+                    <div class="border-t border-gray-300"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

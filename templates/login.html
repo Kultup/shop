@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Вхід - Інтернет-Магазин{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-8">
+    <div class="w-full max-w-md mx-auto relative">
+        <!-- Декоративні елементи -->
+        <div class="absolute -top-4 -right-4 text-6xl sm:text-8xl opacity-20">🎈</div>
+        <div class="absolute -bottom-4 -left-4 text-6xl sm:text-8xl opacity-20">🎁</div>
+        
+        <div class="relative bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-yellow-300 p-6 sm:p-8 md:p-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-purple-900 mb-2 sm:mb-4 text-center drop-shadow-lg flex items-center justify-center gap-2">
+                <span class="text-4xl sm:text-5xl">🚪</span>
+                <span>Вхід</span>
+                <span class="text-4xl sm:text-5xl">✨</span>
+            </h1>
+            <p class="text-center text-purple-600 text-sm sm:text-base mb-6 sm:mb-8">Ласкаво просимо назад! 🎉</p>
+            
+            <form method="POST" class="space-y-4 sm:space-y-5">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label class="block text-purple-900 text-sm sm:text-base font-bold mb-2 flex items-center gap-2">
+                        <span>👤</span>
+                        <span>{{ form.username.label.text }}</span>
+                    </label>
+                    {{ form.username(class="w-full px-4 py-3 sm:py-3.5 border-2 border-purple-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-base sm:text-lg font-medium bg-white/80") }}
+                    {% if form.username.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.username.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-sm sm:text-base font-bold mb-2 flex items-center gap-2">
+                        <span>🔒</span>
+                        <span>{{ form.password.label.text }}</span>
+                    </label>
+                    {{ form.password(class="w-full px-4 py-3 sm:py-3.5 border-2 border-purple-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-base sm:text-lg font-medium bg-white/80") }}
+                    {% if form.password.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.password.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl shadow-xl hover:shadow-2xl transition-all border-2 border-white/50 transform hover:scale-105">
+                    <span class="flex items-center justify-center gap-2">
+                        <span>🎯</span>
+                        <span>{{ form.submit.label.text }}</span>
+                        <span>✨</span>
+                    </span>
+                </button>
+            </form>
+            
+            <div class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t-2 border-purple-200">
+                <p class="text-center text-purple-700 text-sm sm:text-base font-medium">
+                    Немає акаунту? 
+                    <a href="{{ url_for('auth.register') }}" class="text-pink-600 hover:text-purple-600 font-bold transition-colors inline-flex items-center gap-1">
+                        <span>Зареєструватися</span>
+                        <span>🎉</span>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Управління товарами - Адмін-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Управління товарами</h1>
+            <p class="text-gray-600 text-sm sm:text-base">Додавання, редагування та видалення товарів</p>
+        </div>
+        <a href="{{ url_for('admin.add_product') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all whitespace-nowrap">
+            Додати товар
+        </a>
+    </div>
+
+    <!-- Пошук -->
+    <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+        <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <input type="text" name="search" value="{{ search }}" placeholder="Пошук товарів..." 
+                   class="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+            <div class="flex gap-2 sm:gap-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all">
+                    Пошук
+                </button>
+                {% if search %}
+                    <a href="{{ url_for('admin.products') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all">
+                        Скинути
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Таблиця товарів -->
+{% if products.items %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            <input type="checkbox" id="select-all" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        </th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Зображення</th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Назва</th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Категорія</th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Статус</th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Дії</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for product in products.items %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="product_ids" value="{{ product.id }}" class="product-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy" class="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded border border-gray-200">
+                                {% else %}
+                                    <div class="h-12 w-12 sm:h-16 sm:w-16 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                                        <span class="text-gray-400 text-xs">—</span>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4">
+                                <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                {% if product.description %}
+                                    <div class="text-xs sm:text-sm text-gray-500 line-clamp-1 mt-1">{{ product.description }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                {% if product.category_obj %}
+                                    <span class="text-xs sm:text-sm text-gray-900">{{ product.category_obj.full_path }}</span>
+                                {% elif product.category %}
+                                    <span class="text-xs sm:text-sm text-gray-900">{{ product.category }}</span>
+                                {% else %}
+                                    <span class="text-xs sm:text-sm text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                {% if product.is_active %}
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Активний</span>
+                                {% else %}
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Неактивний</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-right">
+                                <div class="flex items-center justify-end gap-2 sm:gap-3 flex-wrap">
+                                    <form method="POST" action="{{ url_for('admin.toggle_product_status', product_id=product.id) }}" class="inline">
+                                        <button type="submit" 
+                                                class="{% if product.is_active %}bg-yellow-500 hover:bg-yellow-600 text-white{% else %}bg-green-500 hover:bg-green-600 text-white{% endif %} px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium transition-colors shadow-sm hover:shadow">
+                                            {% if product.is_active %}⏸️ Вимкнути{% else %}▶️ Увімкнути{% endif %}
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium transition-colors shadow-sm hover:shadow">
+                                        ✏️ Редагувати
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.delete_product', product_id=product.id) }}" class="inline">
+                                        <button type="submit" 
+                                                class="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium transition-colors shadow-sm hover:shadow" 
+                                                onclick="return confirm('Ви впевнені, що хочете видалити товар?')">
+                                            🗑️ Видалити
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Панель масових дій -->
+        <div id="bulk-actions" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 hidden">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
+                <span class="text-sm font-medium text-gray-700">
+                    Вибрано товарів: <span id="selected-count">0</span>
+                </span>
+                <div class="flex flex-wrap gap-2 sm:gap-3">
+                    <form method="POST" action="{{ url_for('admin.bulk_activate_products') }}" id="bulk-activate-form" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            ▶️ Активувати вибрані
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.bulk_deactivate_products') }}" id="bulk-deactivate-form" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            ⏸️ Деактивувати вибрані
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.bulk_delete_products') }}" id="bulk-delete-form" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            🗑️ Видалити вибрані
+                        </button>
+                    </form>
+                    <div class="relative inline-block">
+                        <form method="POST" action="{{ url_for('admin.bulk_change_category') }}" id="bulk-category-form" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <select name="category_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Змінити категорію...</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.full_path }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors ml-2">
+                                🏷️ Змінити категорію
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пагінація -->
+    {% if products.pages > 1 %}
+        <div class="mt-6 sm:mt-8 flex justify-center">
+            <nav class="flex flex-wrap gap-2 justify-center">
+                {% if products.has_prev %}
+                    <a href="{{ url_for('admin.products', page=products.prev_num, search=search) }}" 
+                       class="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+                        Попередня
+                    </a>
+                {% endif %}
+                
+                {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == products.page %}
+                            <span class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">{{ page_num }}</span>
+                        {% else %}
+                            <a href="{{ url_for('admin.products', page=page_num, search=search) }}" 
+                               class="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+                                {{ page_num }}
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <span class="px-2 py-2 text-gray-400">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if products.has_next %}
+                    <a href="{{ url_for('admin.products', page=products.next_num, search=search) }}" 
+                       class="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+                        Наступна
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
+        <p class="text-gray-600 text-base sm:text-lg mb-4">Товарів не знайдено</p>
+        <a href="{{ url_for('admin.add_product') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all">
+            Додати товар
+        </a>
+    </div>
+{% endif %}
+
+<script>
+    // Обробка масових операцій
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectedCount = document.getElementById('selected-count');
+        
+        // Вибрати/зняти всі
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateBulkActions();
+            });
+        }
+        
+        // Оновлення панелі масових дій
+        function updateBulkActions() {
+            const selected = Array.from(checkboxes).filter(cb => cb.checked);
+            const count = selected.length;
+            
+            if (count > 0) {
+                bulkActions.classList.remove('hidden');
+                selectedCount.textContent = count;
+                
+                // Додаємо вибрані ID до форм
+                const productIds = selected.map(cb => cb.value).join(',');
+                document.querySelectorAll('#bulk-activate-form, #bulk-deactivate-form, #bulk-delete-form, #bulk-category-form').forEach(form => {
+                    // Видаляємо старі hidden input з product_ids якщо є (не чіпаємо csrf_token)
+                    const oldInput = form.querySelector('input[name="product_ids"]');
+                    if (oldInput) oldInput.remove();
+                    
+                    // Додаємо новий hidden input з вибраними ID
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'product_ids';
+                    input.value = productIds;
+                    form.appendChild(input);
+                });
+            } else {
+                bulkActions.classList.add('hidden');
+            }
+        }
+        
+        // Обробка вибору окремих товарів
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Оновлюємо стан "Вибрати всі"
+                if (selectAll) {
+                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(checkboxes).some(cb => cb.checked);
+                    selectAll.checked = allChecked;
+                    selectAll.indeterminate = someChecked && !allChecked;
+                }
+                updateBulkActions();
+            });
+        });
+        
+        // Обробка підтвердження для масового видалення
+        document.getElementById('bulk-delete-form')?.addEventListener('submit', function(e) {
+            const selected = Array.from(checkboxes).filter(cb => cb.checked).length;
+            if (typeof showConfirmModal === 'function') {
+                e.preventDefault();
+                showConfirmModal(`Ви впевнені, що хочете видалити ${selected} товар(ів)?`, () => {
+                    this.submit();
+                });
+            } else if (!confirm(`Ви впевнені, що хочете видалити ${selected} товар(ів)?`)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Обробка масової зміни категорії
+        document.getElementById('bulk-category-form')?.addEventListener('submit', function(e) {
+            const categorySelect = this.querySelector('select[name="category_id"]');
+            if (!categorySelect.value) {
+                e.preventDefault();
+                alert('Будь ласка, оберіть категорію');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}
+

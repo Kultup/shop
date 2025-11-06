@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Замовлення #{{ order.id }} - Адмін-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+            <a href="{{ url_for('admin.orders') }}" class="text-blue-600 hover:text-blue-800 mb-2 sm:mb-4 inline-block text-sm sm:text-base">← Назад до замовлень</a>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Замовлення #{{ order.id }}</h1>
+        </div>
+        <a href="{{ url_for('admin.print_order', order_id=order.id) }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            Друкувати
+        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Інформація про користувача</h2>
+            <div class="space-y-2 text-sm sm:text-base">
+                <p class="text-gray-700"><strong>Ім'я:</strong> {{ order.user.username }}</p>
+                <p class="text-gray-700"><strong>Email:</strong> {{ order.user.email }}</p>
+                {% if order.user.city %}
+                    <p class="text-gray-700"><strong>Місто:</strong> {{ order.user.city }}</p>
+                {% endif %}
+                {% if order.user.institution %}
+                    <p class="text-gray-700"><strong>Заклад:</strong> {{ order.user.institution }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Інформація про замовлення</h2>
+            <div class="space-y-2 text-sm sm:text-base">
+                <p class="text-gray-700"><strong>Дата створення:</strong> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                <p class="text-gray-700"><strong>Останнє оновлення:</strong> {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                {% if order.city %}
+                    <p class="text-gray-700"><strong>Місто:</strong> {{ order.city }}</p>
+                {% endif %}
+                {% if order.institution %}
+                    <p class="text-gray-700"><strong>Заклад:</strong> {{ order.institution }}</p>
+                {% endif %}
+                <p class="text-gray-700"><strong>Поточний статус:</strong> 
+                    <span class="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
+                        {% if order.status == 'completed' %}bg-green-100 text-green-800
+                        {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {% if order.status == 'pending' %}Очікує
+                        {% elif order.status == 'processing' %}Обробляється
+                        {% elif order.status == 'completed' %}Завершено
+                        {% elif order.status == 'cancelled' %}Скасовано
+                        {% else %}{{ order.status }}{% endif %}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="border-t border-gray-200 pt-4 sm:pt-6 mb-4 sm:mb-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Товари в замовленні</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Товар</th>
+                        <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Кількість</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in order.items %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if item.product.image_url %}
+                                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" loading="lazy" class="h-10 w-10 sm:h-12 sm:w-12 object-cover rounded border border-gray-200 mr-3 sm:mr-4">
+                                    {% endif %}
+                                    <div>
+                                        <div class="text-xs sm:text-sm font-medium text-gray-900">{{ item.product.name }}</div>
+                                        {% if item.product.category_obj %}
+                                            <div class="text-xs sm:text-sm text-gray-500">{{ item.product.category_obj.full_path }}</div>
+                                        {% elif item.product.category %}
+                                            <div class="text-xs sm:text-sm text-gray-500">{{ item.product.category }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 font-medium">
+                                {{ item.quantity }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="border-t border-gray-200 pt-4 sm:pt-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Змінити статус</h2>
+        <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}" class="max-w-md">
+            {{ form.hidden_tag() }}
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div class="flex-1">
+                    {{ form.status(class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base") }}
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all whitespace-nowrap">
+                    Оновити
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

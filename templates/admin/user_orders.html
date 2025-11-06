@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Замовлення користувача {{ user.username }} - Адмін-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Замовлення користувача</h1>
+            <p class="text-gray-600 text-sm sm:text-base">
+                <span class="font-medium">{{ user.username }}</span>
+                {% if user.email %}
+                    <span class="text-gray-400">•</span>
+                    <span>{{ user.email }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <a href="{{ url_for('admin.users') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all whitespace-nowrap">
+            ← Назад до користувачів
+        </a>
+    </div>
+
+    <!-- Інформація про користувача -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4">Інформація про користувача</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <p class="text-xs sm:text-sm text-gray-500 mb-1">Ім'я користувача</p>
+                <p class="text-sm sm:text-base font-medium text-gray-900">{{ user.username }}</p>
+            </div>
+            <div>
+                <p class="text-xs sm:text-sm text-gray-500 mb-1">Email</p>
+                <p class="text-sm sm:text-base font-medium text-gray-900">{{ user.email }}</p>
+            </div>
+            {% if user.city %}
+                <div>
+                    <p class="text-xs sm:text-sm text-gray-500 mb-1">Місто</p>
+                    <p class="text-sm sm:text-base font-medium text-gray-900">{{ user.city }}</p>
+                </div>
+            {% endif %}
+            {% if user.institution %}
+                <div>
+                    <p class="text-xs sm:text-sm text-gray-500 mb-1">Заклад</p>
+                    <p class="text-sm sm:text-base font-medium text-gray-900">{{ user.institution }}</p>
+                </div>
+            {% endif %}
+            <div>
+                <p class="text-xs sm:text-sm text-gray-500 mb-1">Статус</p>
+                {% if user.is_blocked %}
+                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Заблоковано</span>
+                {% else %}
+                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Активний</span>
+                {% endif %}
+            </div>
+            <div>
+                <p class="text-xs sm:text-sm text-gray-500 mb-1">Дата реєстрації</p>
+                <p class="text-sm sm:text-base font-medium text-gray-900">{{ user.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика замовлень -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 text-center">
+            <p class="text-xs sm:text-sm text-gray-500 mb-1">Всього</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ total_orders }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 text-center">
+            <p class="text-xs sm:text-sm text-gray-500 mb-1">Очікує</p>
+            <p class="text-lg sm:text-2xl font-bold text-yellow-600">{{ pending_count }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 text-center">
+            <p class="text-xs sm:text-sm text-gray-500 mb-1">Обробляється</p>
+            <p class="text-lg sm:text-2xl font-bold text-blue-600">{{ processing_count }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 text-center">
+            <p class="text-xs sm:text-sm text-gray-500 mb-1">Завершено</p>
+            <p class="text-lg sm:text-2xl font-bold text-green-600">{{ completed_count }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 text-center">
+            <p class="text-xs sm:text-sm text-gray-500 mb-1">Скасовано</p>
+            <p class="text-lg sm:text-2xl font-bold text-red-600">{{ cancelled_count }}</p>
+        </div>
+    </div>
+
+    <!-- Список замовлень -->
+    {% if orders %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">ID</th>
+                            <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Дата</th>
+                            <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Товарів</th>
+                            <th class="px-3 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Статус</th>
+                            <th class="px-3 sm:px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in orders %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    #{{ order.id }}
+                                </td>
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                </td>
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ order.items|length }} товар(ів)
+                                </td>
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
+                                    {% if order.status == 'pending' %}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Очікує</span>
+                                    {% elif order.status == 'processing' %}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Обробляється</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Завершено</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Скасовано</span>
+                                    {% else %}
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-right">
+                                    <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded text-xs sm:text-sm font-medium transition-colors shadow-sm hover:shadow">
+                                        Детальніше
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
+            <p class="text-gray-600 text-base sm:text-lg mb-4">У цього користувача немає замовлень</p>
+        </div>
+    {% endif %}
+{% endblock %}
+

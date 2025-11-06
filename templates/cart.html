@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Кошик - Інтернет-Магазин{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6 px-2 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 mb-4 sm:mb-6 text-center drop-shadow-lg flex items-center justify-center gap-2">
+        <span class="text-3xl sm:text-4xl">🛒</span>
+        <span>Кошик</span>
+        <span class="text-3xl sm:text-4xl">🛍️</span>
+    </h1>
+</div>
+
+{% if cart_items %}
+    <!-- Десктопна версія (таблиця) -->
+    <div class="hidden md:block bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-yellow-300 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-purple-200">
+                <thead class="bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200">
+                    <tr>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-bold text-purple-900 uppercase tracking-wider">Товар</th>
+                        <th class="px-4 sm:px-6 py-3 text-left text-xs sm:text-sm font-bold text-purple-900 uppercase tracking-wider">Кількість</th>
+                        <th class="px-4 sm:px-6 py-3 text-right text-xs sm:text-sm font-bold text-purple-900 uppercase tracking-wider">Дії</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-purple-100">
+                    {% for item in cart_items %}
+                        <tr class="hover:bg-pink-50 transition-colors">
+                            <td class="px-4 sm:px-6 py-4">
+                                <div class="flex items-center">
+                                    {% if item.product.image_url %}
+                                        <img src="{{ item.product.main_image or item.product.image_url }}" alt="{{ item.product.name }}" loading="lazy" class="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg sm:rounded-xl border-2 border-yellow-300">
+                                    {% else %}
+                                        <div class="h-16 w-16 sm:h-20 sm:w-20 bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 rounded-lg sm:rounded-xl flex items-center justify-center border-2 border-yellow-300">
+                                            <span class="text-2xl sm:text-3xl">🎈</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="ml-3 sm:ml-4">
+                                        <a href="{{ url_for('main.product_detail', product_id=item.product.id) }}" class="text-sm sm:text-base font-bold text-purple-900 hover:text-pink-600 transition-colors">
+                                            {{ item.product.name }}
+                                        </a>
+                                        {% if item.product.category_obj %}
+                                            <p class="text-xs sm:text-sm text-purple-600 mt-1">🏷️ {{ item.product.category_obj.full_path }}</p>
+                                        {% elif item.product.category %}
+                                            <p class="text-xs sm:text-sm text-purple-600 mt-1">🏷️ {{ item.product.category }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 sm:px-6 py-4">
+                                <form method="POST" action="{{ url_for('main.update_cart_item', cart_item_id=item.id) }}" class="inline-flex items-center gap-2">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
+                                           class="w-20 sm:w-24 px-3 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-base font-bold text-purple-900 text-center">
+                                    <button type="submit" class="bg-gradient-to-r from-yellow-400 to-pink-400 hover:from-yellow-300 hover:to-pink-300 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-md hover:shadow-lg transition-all">
+                                        🔄
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="px-4 sm:px-6 py-4 text-right">
+                                <form method="POST" action="{{ url_for('main.remove_from_cart', cart_item_id=item.id) }}" class="inline remove-cart-form" data-item-id="{{ item.id }}">
+                                    <button type="submit" class="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md hover:shadow-lg transition-all">
+                                        🗑️ Видалити
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 px-4 sm:px-6 py-4 sm:py-6 border-t-2 sm:border-t-4 border-yellow-300">
+            <form method="POST" action="{{ url_for('main.checkout') }}">
+                <button type="submit" class="w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 hover:from-green-300 hover:via-emerald-400 hover:to-teal-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl shadow-xl hover:shadow-2xl transition-all border-2 border-white/50 transform hover:scale-105">
+                    <span class="flex items-center justify-center gap-2">
+                        <span>✅</span>
+                        <span>Оформити замовлення</span>
+                        <span>🎉</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Мобільна версія (картки) -->
+    <div class="md:hidden space-y-4 px-2">
+        {% for item in cart_items %}
+            <div class="bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl border-2 border-yellow-300 p-4 overflow-hidden">
+                <div class="flex items-start gap-4">
+                    {% if item.product.image_url %}
+                        <img src="{{ item.product.main_image or item.product.image_url }}" alt="{{ item.product.name }}" loading="lazy" class="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-xl border-2 border-yellow-300 flex-shrink-0">
+                    {% else %}
+                        <div class="h-20 w-20 sm:h-24 sm:w-24 bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 rounded-xl flex items-center justify-center border-2 border-yellow-300 flex-shrink-0">
+                            <span class="text-3xl sm:text-4xl">🎈</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <a href="{{ url_for('main.product_detail', product_id=item.product.id) }}" class="text-base sm:text-lg font-bold text-purple-900 hover:text-pink-600 transition-colors line-clamp-2">
+                            {{ item.product.name }}
+                        </a>
+                        {% if item.product.category_obj %}
+                            <p class="text-xs sm:text-sm text-purple-600 mt-1">🏷️ {{ item.product.category_obj.full_path }}</p>
+                        {% elif item.product.category %}
+                            <p class="text-xs sm:text-sm text-purple-600 mt-1">🏷️ {{ item.product.category }}</p>
+                        {% endif %}
+                        
+                        <div class="mt-3 flex items-center gap-2">
+                            <label class="text-xs sm:text-sm font-bold text-purple-900">Кількість:</label>
+                            <form method="POST" action="{{ url_for('main.update_cart_item', cart_item_id=item.id) }}" class="flex items-center gap-2 flex-1">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
+                                       class="w-16 sm:w-20 px-2 py-1.5 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm font-bold text-purple-900 text-center">
+                                <button type="submit" class="bg-gradient-to-r from-yellow-400 to-pink-400 hover:from-yellow-300 hover:to-pink-300 text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-md hover:shadow-lg transition-all">
+                                    🔄
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <form method="POST" action="{{ url_for('main.remove_from_cart', cart_item_id=item.id) }}" class="mt-3 remove-cart-form" data-item-id="{{ item.id }}">
+                            <button type="submit" class="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md hover:shadow-lg transition-all">
+                                🗑️ Видалити
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        
+        <div class="bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 rounded-2xl shadow-xl border-2 border-yellow-300 p-4 sm:p-6">
+            <form method="POST" action="{{ url_for('main.checkout') }}">
+                <button type="submit" class="w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 hover:from-green-300 hover:via-emerald-400 hover:to-teal-400 text-white py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all border-2 border-white/50 transform hover:scale-105">
+                    <span class="flex items-center justify-center gap-2">
+                        <span>✅</span>
+                        <span>Оформити замовлення</span>
+                        <span>🎉</span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+{% else %}
+    <div class="bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 p-6 sm:p-8 md:p-10 rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-4 border-yellow-400 text-center mx-2 sm:mx-0">
+        <div class="text-6xl sm:text-8xl mb-4">🛒</div>
+        <p class="text-purple-900 text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Ваш кошик порожній! 😢</p>
+        <p class="text-purple-700 text-base sm:text-lg mb-5 sm:mb-6">Додайте товари до кошика, щоб почати покупки! 🎁</p>
+        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all font-bold text-base sm:text-lg bounce-hover">
+            <span class="flex items-center justify-center gap-2">
+                <span>🏠</span>
+                <span>Перейти до каталогу</span>
+                <span>✨</span>
+            </span>
+        </a>
+    </div>
+{% endif %}
+
+<script>
+    // Обробка видалення товарів з кошику
+    document.addEventListener('DOMContentLoaded', function() {
+        const removeForms = document.querySelectorAll('.remove-cart-form');
+        
+        removeForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const form = this;
+                const itemId = form.getAttribute('data-item-id');
+                
+                // Показуємо модальне вікно підтвердження
+                if (typeof showConfirmModal === 'function') {
+                    showConfirmModal('Видалити товар з кошику?', function() {
+                        // Очищаємо localStorage перед видаленням, щоб уникнути конфліктів
+                        if (typeof CartManager !== 'undefined') {
+                            CartManager.clearCart();
+                        }
+                        
+                        // Відправляємо форму
+                        form.submit();
+                    });
+                } else {
+                    // Якщо модальне вікно не доступне, використовуємо confirm
+                    if (confirm('Видалити товар з кошику?')) {
+                        // Очищаємо localStorage перед видаленням, щоб уникнути конфліктів
+                        if (typeof CartManager !== 'undefined') {
+                            CartManager.clearCart();
+                        }
+                        
+                        form.submit();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Реєстрація - Інтернет-Магазин{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-6 sm:py-8">
+    <div class="w-full max-w-lg mx-auto relative">
+        <!-- Декоративні елементи -->
+        <div class="absolute -top-4 -right-4 text-5xl sm:text-7xl md:text-8xl opacity-20">🎈</div>
+        <div class="absolute -bottom-4 -left-4 text-5xl sm:text-7xl md:text-8xl opacity-20">🎁</div>
+        <div class="absolute top-1/2 -right-8 text-4xl sm:text-6xl opacity-20">✨</div>
+        <div class="absolute top-1/2 -left-8 text-4xl sm:text-6xl opacity-20">🎯</div>
+        
+        <div class="relative bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-yellow-300 p-5 sm:p-6 md:p-8 lg:p-10">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 mb-2 sm:mb-4 text-center drop-shadow-lg flex items-center justify-center gap-2">
+                <span class="text-3xl sm:text-4xl md:text-5xl">🎉</span>
+                <span>Реєстрація</span>
+                <span class="text-3xl sm:text-4xl md:text-5xl">🎊</span>
+            </h1>
+            <p class="text-center text-purple-600 text-xs sm:text-sm md:text-base mb-5 sm:mb-6 md:mb-8">Створіть свій акаунт та розпочніть покупки! 🛒</p>
+            
+            <form method="POST" class="space-y-3 sm:space-y-4 md:space-y-5">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>👤</span>
+                        <span>{{ form.username.label.text }}</span>
+                    </label>
+                    {{ form.username(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.username.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.username.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>📧</span>
+                        <span>{{ form.email.label.text }}</span>
+                    </label>
+                    {{ form.email(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.email.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.email.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>🔒</span>
+                        <span>{{ form.password.label.text }}</span>
+                    </label>
+                    {{ form.password(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.password.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.password.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>🔐</span>
+                        <span>{{ form.password2.label.text }}</span>
+                    </label>
+                    {{ form.password2(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.password2.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.password2.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>🏙️</span>
+                        <span>{{ form.city.label.text }}</span>
+                    </label>
+                    {{ form.city(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.city.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.city.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-purple-900 text-xs sm:text-sm md:text-base font-bold mb-1.5 sm:mb-2 flex items-center gap-2">
+                        <span>🏫</span>
+                        <span>{{ form.institution.label.text }}</span>
+                    </label>
+                    {{ form.institution(class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-purple-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-sm sm:text-base md:text-lg font-medium bg-white/80") }}
+                    {% if form.institution.errors %}
+                        <p class="text-red-600 text-xs sm:text-sm mt-1.5 sm:mt-2 font-medium flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span>{{ form.institution.errors[0] }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg md:text-xl shadow-xl hover:shadow-2xl transition-all border-2 border-white/50 transform hover:scale-105 mt-4 sm:mt-6">
+                    <span class="flex items-center justify-center gap-2">
+                        <span>🎯</span>
+                        <span>{{ form.submit.label.text }}</span>
+                        <span>✨</span>
+                    </span>
+                </button>
+            </form>
+            
+            <div class="mt-5 sm:mt-6 md:mt-8 pt-5 sm:pt-6 md:pt-8 border-t-2 border-purple-200">
+                <p class="text-center text-purple-700 text-xs sm:text-sm md:text-base font-medium">
+                    Вже маєте акаунт? 
+                    <a href="{{ url_for('auth.login') }}" class="text-pink-600 hover:text-purple-600 font-bold transition-colors inline-flex items-center gap-1">
+                        <span>Увійти</span>
+                        <span>🚪</span>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

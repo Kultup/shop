@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Інтернет-Магазин{% endblock %}
+
+{% block content %}
+<div class="relative bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-3xl shadow-2xl border-4 border-yellow-300 overflow-hidden">
+    <!-- Декоративні елементи -->
+    <div class="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-yellow-300/20 to-pink-300/20 rounded-br-full"></div>
+    <div class="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-300/20 to-indigo-300/20 rounded-tl-full"></div>
+    <div class="absolute top-10 right-10 text-4xl">✨</div>
+    <div class="absolute bottom-10 left-10 text-4xl">🎈</div>
+    
+    <div class="md:flex relative z-10">
+        <div class="md:w-1/2 relative overflow-hidden">
+            {% if product.main_image or product.image_url %}
+                <div class="relative h-full min-h-[500px]">
+                    <img id="main-product-image" src="{{ product.main_image or product.image_url }}" alt="{{ product.name }}" loading="lazy" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <!-- Бейдж -->
+                    <div class="absolute top-6 right-6 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl border-2 border-white">
+                        ⭐ ХІТ ПРОДАЖУ
+                    </div>
+                    
+                    <!-- Галерея зображень -->
+                    {% if product.images and product.images|length > 0 %}
+                        <div class="absolute bottom-4 left-4 right-4 flex gap-2 overflow-x-auto pb-2">
+                            {% for img in product.images %}
+                                <img src="{{ img.image_url }}" alt="{{ product.name }}" loading="lazy" 
+                                     onclick="document.getElementById('main-product-image').src='{{ img.image_url }}'"
+                                     class="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border-2 border-yellow-300 cursor-pointer hover:border-yellow-400 transition-all hover:scale-110 flex-shrink-0">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="w-full h-full min-h-[500px] bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex items-center justify-center">
+                    <span class="text-9xl">🎈</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="md:w-1/2 p-8 lg:p-12 bg-gradient-to-b from-white/95 to-transparent">
+            <h1 class="text-4xl lg:text-5xl font-bold text-purple-900 mb-6 drop-shadow-lg">
+                {{ product.name }}
+            </h1>
+            
+            {% if product.category_obj %}
+                <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-sm px-6 py-3 rounded-full mb-6 font-bold shadow-lg border-2 border-white/50">
+                    <span class="text-xl">🏷️</span>
+                    {{ product.category_obj.full_path }}
+                </span>
+            {% elif product.category %}
+                <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-sm px-6 py-3 rounded-full mb-6 font-bold shadow-lg border-2 border-white/50">
+                    <span class="text-xl">🏷️</span>
+                    {{ product.category }}
+                </span>
+            {% endif %}
+            
+            {% if product.description %}
+                <div class="mb-8 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-6 rounded-2xl border-2 border-purple-200">
+                    <h2 class="text-2xl font-bold text-purple-900 mb-3 flex items-center gap-2">
+                        <span>📝</span>
+                        <span>Опис</span>
+                    </h2>
+                    <p class="text-purple-700 text-lg leading-relaxed font-medium">{{ product.description }}</p>
+                </div>
+            {% endif %}
+            
+            {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="mt-8">
+                    <div class="flex items-center gap-4 mb-6 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-5 rounded-2xl border-2 border-purple-200">
+                        <label for="quantity" class="text-purple-900 font-bold text-lg flex items-center gap-2">
+                            <span>🔢</span>
+                            <span>Кількість:</span>
+                        </label>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1" 
+                               class="w-24 px-4 py-3 border-2 border-purple-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-lg font-bold text-purple-900 text-center">
+                    </div>
+                    <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50 relative">
+                        <span id="add-to-cart-text" class="flex items-center justify-center gap-3">
+                            <span>🛒</span>
+                            <span>Додати до кошика</span>
+                            <span>✨</span>
+                        </span>
+                        <span id="add-to-cart-loading" class="hidden absolute inset-0 flex items-center justify-center gap-2">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Додавання...</span>
+                        </span>
+                    </button>
+                </form>
+            {% else %}
+                <div class="bg-gradient-to-r from-yellow-100/50 via-pink-100/50 to-purple-100/50 p-6 rounded-2xl border-2 border-yellow-300 mb-6">
+                    <p class="text-purple-900 font-bold text-lg mb-4 text-center">🔐 Увійдіть, щоб додати товар до кошика</p>
+                </div>
+                <a href="{{ url_for('auth.login') }}" class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-5 rounded-2xl font-bold text-xl text-center shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50">
+                    <span class="flex items-center justify-center gap-3">
+                        <span>🚪</span>
+                        <span>Увійти</span>
+                        <span>✨</span>
+                    </span>
+                </a>
+            {% endif %}
+            
+            <a href="{{ url_for('main.index') }}" class="block mt-6 text-center text-purple-700 hover:text-pink-600 font-bold text-lg transition-colors flex items-center justify-center gap-2">
+                <span>←</span>
+                <span>Повернутися до каталогу</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Loading states при додаванні в кошик
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartForm = document.querySelector('form[action*="/cart/add/"]');
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        const addToCartText = document.getElementById('add-to-cart-text');
+        const addToCartLoading = document.getElementById('add-to-cart-loading');
+        
+        if (addToCartForm && addToCartBtn) {
+            addToCartForm.addEventListener('submit', function(e) {
+                // Показуємо індикатор завантаження
+                if (addToCartText) addToCartText.classList.add('hidden');
+                if (addToCartLoading) addToCartLoading.classList.remove('hidden');
+                if (addToCartBtn) {
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+

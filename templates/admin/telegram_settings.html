@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Налаштування Telegram - Адмін-панель{% endblock %}
+
+{% block content %}
+<div class="mb-4 sm:mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Налаштування Telegram</h1>
+    <p class="text-gray-600 text-sm sm:text-base">Налаштуйте Telegram бота для отримання повідомлень про нові замовлення</p>
+</div>
+
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="space-y-4 sm:space-y-6">
+            <!-- Токен бота -->
+            <div>
+                {{ form.bot_token.label(class="block text-gray-700 text-sm font-semibold mb-2") }}
+                {{ form.bot_token(class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base") }}
+                {% if form.bot_token.errors %}
+                    <p class="text-red-600 text-xs sm:text-sm mt-1">{{ form.bot_token.errors[0] }}</p>
+                {% endif %}
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                    Отримайте токен від <a href="https://t.me/BotFather" target="_blank" class="text-blue-600 hover:underline">@BotFather</a> в Telegram
+                </p>
+            </div>
+            
+            <!-- Chat ID -->
+            <div>
+                {{ form.chat_id.label(class="block text-gray-700 text-sm font-semibold mb-2") }}
+                {{ form.chat_id(class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base") }}
+                {% if form.chat_id.errors %}
+                    <p class="text-red-600 text-xs sm:text-sm mt-1">{{ form.chat_id.errors[0] }}</p>
+                {% endif %}
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                    Отримайте Chat ID через <a href="https://t.me/getidsbot" target="_blank" class="text-blue-600 hover:underline">@getidsbot</a> або <a href="https://t.me/userinfobot" target="_blank" class="text-blue-600 hover:underline">@userinfobot</a>
+                </p>
+            </div>
+            
+            <!-- Увімкнути/вимкнути -->
+            <div class="flex items-center">
+                {{ form.enabled(class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded") }}
+                {{ form.enabled.label(class="ml-2 block text-sm text-gray-700 font-medium") }}
+            </div>
+            {% if form.enabled.errors %}
+                <p class="text-red-600 text-xs sm:text-sm mt-1">{{ form.enabled.errors[0] }}</p>
+            {% endif %}
+            
+            <!-- Інструкція -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <h3 class="text-sm font-semibold text-blue-900 mb-2">📋 Інструкція:</h3>
+                <ol class="text-xs sm:text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                    <li>Створіть бота через <a href="https://t.me/BotFather" target="_blank" class="underline">@BotFather</a> в Telegram</li>
+                    <li>Додайте бота в групу (надайте права адміністратора якщо потрібно)</li>
+                    <li>Отримайте Chat ID групи через <a href="https://t.me/getidsbot" target="_blank" class="underline">@getidsbot</a></li>
+                    <li>Введіть токен бота та Chat ID вище</li>
+                    <li>Увімкніть повідомлення та збережіть налаштування</li>
+                </ol>
+            </div>
+            
+            <!-- Кнопка збереження -->
+            <div class="pt-4">
+                {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base shadow-sm hover:shadow transition-all") }}
+                <a href="{{ url_for('admin.dashboard') }}" class="ml-3 px-6 py-2 sm:py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium text-sm sm:text-base transition-all">
+                    Скасувати
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
