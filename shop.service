@@ -1,0 +1,53 @@
+# Systemd service файл для Flask додатку "Країна Мрій"
+#
+# Встановлення:
+# 1. Скопіюйте цей файл в /etc/systemd/system/shop.service
+# 2. Відредагуйте шляхи та користувача
+# 3. Запустіть: sudo systemctl daemon-reload
+# 4. Увімкніть автозапуск: sudo systemctl enable shop
+# 5. Запустіть сервіс: sudo systemctl start shop
+# 6. Перевірте статус: sudo systemctl status shop
+
+[Unit]
+Description=Shop Flask Application (Країна Мрій)
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/shop
+Environment="PATH=/path/to/shop/venv/bin"
+Environment="FLASK_ENV=production"
+Environment="SECRET_KEY=your-secret-key-here"
+Environment="DATABASE_URL=sqlite:///shop.db"
+# Telegram налаштування (опціонально)
+# Environment="TELEGRAM_BOT_TOKEN=your-token"
+# Environment="TELEGRAM_CHAT_ID=your-chat-id"
+# Environment="TELEGRAM_ENABLED=true"
+
+# Запуск Gunicorn
+ExecStart=/path/to/shop/venv/bin/gunicorn \
+    --config /path/to/shop/gunicorn_config.py \
+    app:app
+
+# Перезапуск при збоях
+Restart=always
+RestartSec=10
+
+# Ліміти ресурсів
+LimitNOFILE=65535
+LimitNPROC=4096
+
+# Безпека
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/path/to/shop/instance
+ReadWritePaths=/path/to/shop/static/uploads
+ReadWritePaths=/path/to/shop/logs
+
+[Install]
+WantedBy=multi-user.target
+

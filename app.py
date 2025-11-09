@@ -160,7 +160,11 @@ def create_app():
     
     return app
 
+# Створюємо глобальну змінну app для Gunicorn
+# Gunicorn очікує змінну app на рівні модуля, а не всередині if __name__ == '__main__'
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
+    # Для локального запуску (python app.py)
     app.run(debug=True, host='0.0.0.0', port=5000)
 
