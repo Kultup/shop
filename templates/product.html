@@ -86,13 +86,28 @@
             
             {% if current_user.is_authenticated %}
                 <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="mt-8">
-                    <div class="flex items-center gap-4 mb-6 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-5 rounded-2xl border-2 border-purple-200">
-                        <label for="quantity" class="text-purple-900 font-bold text-lg flex items-center gap-2">
+                    <div class="mb-6 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-4 sm:p-5 rounded-2xl border-2 border-purple-200">
+                        <label for="quantity" class="block text-purple-900 font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
                             <span>🔢</span>
                             <span>Кількість:</span>
                         </label>
-                        <input type="number" name="quantity" id="quantity" value="1" min="1" 
-                               class="w-24 px-4 py-3 border-2 border-purple-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-lg font-bold text-purple-900 text-center">
+                        <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                            <!-- Кнопка зменшення -->
+                            <button type="button" onclick="decreaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl hover:scale-110 active:scale-95">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"></path>
+                                </svg>
+                            </button>
+                            <!-- Поле вводу -->
+                            <input type="number" name="quantity" id="quantity" value="1" min="1" 
+                                   class="w-20 sm:w-24 md:w-28 px-2 sm:px-4 py-2 sm:py-3 border-2 border-purple-300 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-base sm:text-lg md:text-xl font-bold text-purple-900 text-center appearance-none">
+                            <!-- Кнопка збільшення -->
+                            <button type="button" onclick="increaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl hover:scale-110 active:scale-95">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50 relative">
                         <span id="add-to-cart-text" class="flex items-center justify-center gap-3">
@@ -129,6 +144,18 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Приховуємо стандартні стрілочки в полі number */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
 
 <script>
     // Масив зображень товару
@@ -194,6 +221,27 @@
         });
     }
     
+    // Функція збільшення кількості
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        if (quantityInput) {
+            const currentValue = parseInt(quantityInput.value) || 1;
+            quantityInput.value = currentValue + 1;
+        }
+    }
+    
+    // Функція зменшення кількості
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        if (quantityInput) {
+            const currentValue = parseInt(quantityInput.value) || 1;
+            const minValue = parseInt(quantityInput.min) || 1;
+            if (currentValue > minValue) {
+                quantityInput.value = currentValue - 1;
+            }
+        }
+    }
+    
     // Навігація клавіатурою
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
@@ -215,6 +263,18 @@
         {% endif %}
         
         updateImage();
+        
+        // Валідація поля кількості
+        const quantityInput = document.getElementById('quantity');
+        if (quantityInput) {
+            quantityInput.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                const min = parseInt(this.min) || 1;
+                if (isNaN(value) || value < min) {
+                    this.value = min;
+                }
+            });
+        }
         
         // Loading states при додаванні в кошик
         const addToCartForm = document.querySelector('form[action*="/cart/add/"]');
