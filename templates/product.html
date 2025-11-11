@@ -8,7 +8,6 @@
     <div class="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-yellow-300/20 to-pink-300/20 rounded-br-full"></div>
     <div class="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-300/20 to-indigo-300/20 rounded-tl-full"></div>
     <div class="absolute top-10 right-10 text-4xl">✨</div>
-    <div class="absolute bottom-10 left-10 text-4xl">🎈</div>
     
     <div class="md:flex relative z-10">
         <div class="md:w-1/2 relative overflow-hidden">
@@ -57,41 +56,45 @@
                 </div>
             {% endif %}
         </div>
-        <div class="md:w-1/2 p-8 lg:p-12 bg-gradient-to-b from-white/95 to-transparent">
-            <h1 class="text-4xl lg:text-5xl font-bold text-purple-900 mb-6 drop-shadow-lg">
+        <div class="md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-b from-white/95 to-transparent">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-purple-900 mb-4 sm:mb-6 drop-shadow-lg text-center sm:text-left">
                 {{ product.name }}
             </h1>
             
             {% if product.category_obj %}
-                <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-sm px-6 py-3 rounded-full mb-6 font-bold shadow-lg border-2 border-white/50">
-                    <span class="text-xl">🏷️</span>
-                    {{ product.category_obj.full_path }}
-                </span>
+                <div class="flex justify-center sm:justify-start mb-4 sm:mb-6">
+                    <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full font-bold shadow-lg border-2 border-white/50">
+                        <span class="text-lg sm:text-xl">🏷️</span>
+                        <span>{{ product.category_obj.full_path }}</span>
+                    </span>
+                </div>
             {% elif product.category %}
-                <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-sm px-6 py-3 rounded-full mb-6 font-bold shadow-lg border-2 border-white/50">
-                    <span class="text-xl">🏷️</span>
-                    {{ product.category }}
-                </span>
+                <div class="flex justify-center sm:justify-start mb-4 sm:mb-6">
+                    <span class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-3 rounded-full font-bold shadow-lg border-2 border-white/50">
+                        <span class="text-lg sm:text-xl">🏷️</span>
+                        <span>{{ product.category }}</span>
+                    </span>
+                </div>
             {% endif %}
             
             {% if product.description %}
-                <div class="mb-8 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-6 rounded-2xl border-2 border-purple-200">
-                    <h2 class="text-2xl font-bold text-purple-900 mb-3 flex items-center gap-2">
+                <div class="mb-8 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-4 sm:p-6 rounded-2xl border-2 border-purple-200">
+                    <h2 class="text-xl sm:text-2xl font-bold text-purple-900 mb-3 flex items-center justify-center sm:justify-start gap-2">
                         <span>📝</span>
                         <span>Опис</span>
                     </h2>
-                    <p class="text-purple-700 text-lg leading-relaxed font-medium">{{ product.description }}</p>
+                    <p class="text-purple-700 text-base sm:text-lg leading-relaxed font-medium text-center sm:text-left">{{ product.description }}</p>
                 </div>
             {% endif %}
             
             {% if current_user.is_authenticated %}
-                <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="mt-8">
-                    <div class="mb-6 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-4 sm:p-5 rounded-2xl border-2 border-purple-200">
-                        <label for="quantity" class="block text-purple-900 font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                <form method="POST" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="mt-6 sm:mt-8">
+                    <div class="mb-4 sm:mb-6 bg-gradient-to-r from-pink-100/50 via-purple-100/50 to-indigo-100/50 p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-purple-200">
+                        <label for="quantity" class="block text-purple-900 font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center justify-center sm:justify-start gap-2">
                             <span>🔢</span>
                             <span>Кількість:</span>
                         </label>
-                        <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                        <div class="flex items-center justify-center gap-2 sm:gap-3">
                             <!-- Кнопка зменшення -->
                             <button type="button" onclick="decreaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl hover:scale-110 active:scale-95">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,38 +112,53 @@
                             </button>
                         </div>
                     </div>
-                    <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-5 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50 relative">
-                        <span id="add-to-cart-text" class="flex items-center justify-center gap-3">
-                            <span>🛒</span>
-                            <span>Додати до кошика</span>
-                            <span>✨</span>
-                        </span>
-                        <span id="add-to-cart-loading" class="hidden absolute inset-0 flex items-center justify-center gap-2">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Додавання...</span>
-                        </span>
-                    </button>
+                    <!-- Контейнер для кнопки та посилання -->
+                    <div class="bg-white/80 rounded-xl sm:rounded-2xl border border-yellow-200 p-4 sm:p-5">
+                        <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl shadow-lg sm:shadow-xl hover:shadow-xl sm:hover:shadow-2xl transition-all relative mb-4">
+                            <span id="add-to-cart-text" class="flex items-center justify-center gap-2 sm:gap-3">
+                                <!-- Сіра іконка кошика -->
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <span>Додати до кошика</span>
+                                <!-- Жовта зірка -->
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            </span>
+                            <span id="add-to-cart-loading" class="hidden absolute inset-0 flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Додавання...</span>
+                            </span>
+                        </button>
+                        <!-- Посилання повернення -->
+                        <a href="{{ url_for('main.index') }}" class="block text-center text-purple-700 hover:text-pink-600 font-bold text-base sm:text-lg transition-colors flex items-center justify-center gap-2">
+                            <span>←</span>
+                            <span>Повернутися до каталогу</span>
+                        </a>
+                    </div>
                 </form>
             {% else %}
-                <div class="bg-gradient-to-r from-yellow-100/50 via-pink-100/50 to-purple-100/50 p-6 rounded-2xl border-2 border-yellow-300 mb-6">
-                    <p class="text-purple-900 font-bold text-lg mb-4 text-center">🔐 Увійдіть, щоб додати товар до кошика</p>
+                <div class="bg-gradient-to-r from-yellow-100/50 via-pink-100/50 to-purple-100/50 p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-yellow-300 mb-4 sm:mb-6">
+                    <p class="text-purple-900 font-bold text-base sm:text-lg mb-4 text-center">🔐 Увійдіть, щоб додати товар до кошика</p>
                 </div>
-                <a href="{{ url_for('auth.login') }}" class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-5 rounded-2xl font-bold text-xl text-center shadow-2xl hover:shadow-3xl transition-all border-2 border-white/50">
-                    <span class="flex items-center justify-center gap-3">
-                        <span>🚪</span>
-                        <span>Увійти</span>
-                        <span>✨</span>
-                    </span>
-                </a>
+                <div class="bg-white/80 rounded-xl sm:rounded-2xl border border-yellow-200 p-4 sm:p-5">
+                    <a href="{{ url_for('auth.login') }}" class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl text-center shadow-lg sm:shadow-xl hover:shadow-xl sm:hover:shadow-2xl transition-all mb-4">
+                        <span class="flex items-center justify-center gap-2 sm:gap-3">
+                            <span>🚪</span>
+                            <span>Увійти</span>
+                            <span>✨</span>
+                        </span>
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="block text-center text-purple-700 hover:text-pink-600 font-bold text-base sm:text-lg transition-colors flex items-center justify-center gap-2">
+                        <span>←</span>
+                        <span>Повернутися до каталогу</span>
+                    </a>
+                </div>
             {% endif %}
-            
-            <a href="{{ url_for('main.index') }}" class="block mt-6 text-center text-purple-700 hover:text-pink-600 font-bold text-lg transition-colors flex items-center justify-center gap-2">
-                <span>←</span>
-                <span>Повернутися до каталогу</span>
-            </a>
         </div>
     </div>
 </div>
