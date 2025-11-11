@@ -84,10 +84,21 @@ class Product(db.Model):
     
     @property
     def main_image(self):
-        """Повертає головне зображення (перше з images або image_url)"""
+        """Повертає головне зображення (з is_primary=True або перше з images або image_url)"""
+        # Шукаємо зображення з is_primary=True
+        primary_image = next((img for img in self.images if img.is_primary), None)
+        if primary_image:
+            return primary_image.image_url
+        # Якщо немає головного, беремо перше додаткове
         if self.images:
             return self.images[0].image_url
+        # Для зворотної сумісності використовуємо image_url
         return self.image_url
+    
+    @property
+    def additional_images(self):
+        """Повертає додаткові зображення (без головного)"""
+        return [img for img in self.images if not img.is_primary]
 
 
 class ProductImage(db.Model):

@@ -130,24 +130,30 @@ def add_product():
     form = ProductForm()
     
     if form.validate_on_submit():
-        # Обробка завантаженого файлу
-        image_path = None
-        if form.image_file.data:
-            image_path = save_uploaded_file(form.image_file.data)
-        
         product = Product(
             name=form.name.data,
             description=form.description.data,
-            image_url=form.image_url.data if form.image_url.data else None,
+            image_url=None,
             category_id=form.category_id.data if form.category_id.data else None,
             is_active=form.is_active.data
         )
         
-        if image_path:
-            product.image_url = '/' + image_path
-        
         db.session.add(product)
         db.session.flush()  # Отримуємо ID товару
+        
+        # Обробка головного зображення
+        if form.image_file.data:
+            image_path = save_uploaded_file(form.image_file.data)
+            if image_path:
+                # Зберігаємо головне зображення як ProductImage з is_primary=True
+                primary_image = ProductImage(
+                    product_id=product.id,
+                    image_url='/' + image_path,
+                    is_primary=True
+                )
+                db.session.add(primary_image)
+                # Також зберігаємо в image_url для зворотної сумісності
+                product.image_url = '/' + image_path
         
         # Обробка додаткових зображень
         if form.image_files.data:
@@ -184,26 +190,30 @@ def edit_product(product_id):
         form.category_id.data = product.category_id
     
     if form.validate_on_submit():
-        # Обробка завантаженого файлу
-        if form.image_file.data:
-            # Видаляємо старе зображення якщо воно локальне
-            if product.image_url and product.image_url.startswith('/static/uploads'):
-                delete_file(product.image_url[1:])  # Прибираємо початковий /
-            
-            # Зберігаємо нове зображення
-            image_path = save_uploaded_file(form.image_file.data)
-            if image_path:
-                product.image_url = '/' + image_path
-        
         product.name = form.name.data
         product.description = form.description.data
-        
-        # Якщо URL вказано, використовуємо його (якщо файл не завантажено)
-        if form.image_url.data and not form.image_file.data:
-            product.image_url = form.image_url.data
-        
         product.category_id = form.category_id.data if form.category_id.data else None
         product.is_active = form.is_active.data
+        
+        # Обробка головного зображення
+        if form.image_file.data:
+            # Видаляємо старе головне зображення якщо воно локальне
+            old_primary = ProductImage.query.filter_by(product_id=product.id, is_primary=True).first()
+            if old_primary:
+                if old_primary.image_url and old_primary.image_url.startswith('/static/uploads'):
+                    delete_file(old_primary.image_url[1:])  # Прибираємо початковий /
+                db.session.delete(old_primary)
+            
+            # Зберігаємо нове головне зображення
+            image_path = save_uploaded_file(form.image_file.data)
+            if image_path:
+                primary_image = ProductImage(
+                    product_id=product.id,
+                    image_url='/' + image_path,
+                    is_primary=True
+                )
+                db.session.add(primary_image)
+                product.image_url = '/' + image_path
         
         # Обробка додаткових зображень
         if form.image_files.data:
@@ -246,13 +256,33 @@ def toggle_product_status(product_id):
 def delete_product_image(image_id):
     """Видалити зображення товару"""
     product_image = ProductImage.query.get_or_404(image_id)
+    product_id = product_image.product_id
+    is_primary = product_image.is_primary
     
     # Видаляємо файл якщо він локальний
     if product_image.image_url and product_image.image_url.startswith('/static/uploads'):
         delete_file(product_image.image_url[1:])
     
-    product_id = product_image.product_id
     db.session.delete(product_image)
+    
+    # Якщо видаляємо головне зображення, оновлюємо product.image_url
+    if is_primary:
+        product = Product.query.get(product_id)
+        if product:
+            # Шукаємо нове головне зображення
+            new_primary = ProductImage.query.filter_by(product_id=product_id, is_primary=True).first()
+            if new_primary:
+                product.image_url = new_primary.image_url
+            else:
+                # Якщо немає іншого головного, беремо перше додаткове
+                first_additional = ProductImage.query.filter_by(product_id=product_id, is_primary=False).first()
+                if first_additional:
+                    first_additional.is_primary = True
+                    product.image_url = first_additional.image_url
+                else:
+                    # Якщо немає зображень, очищаємо image_url
+                    product.image_url = None
+    
     db.session.commit()
     flash('Зображення успішно видалено', 'success')
     return redirect(url_for('admin.edit_product', product_id=product_id))

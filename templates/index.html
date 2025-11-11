@@ -53,10 +53,10 @@
                 <div class="absolute top-0 left-0 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-300/30 to-pink-300/30 rounded-br-full -z-0"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-tl from-purple-300/30 to-indigo-300/30 rounded-tl-full -z-0"></div>
                 
-                {% if product.main_image or product.image_url %}
+                {% if product.main_image %}
                     <div class="relative overflow-hidden rounded-t-xl sm:rounded-t-2xl">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
-                        <img src="{{ product.main_image or product.image_url }}" alt="{{ product.name }}" loading="lazy" class="w-full h-48 sm:h-56 md:h-64 object-cover transform group-hover:scale-110 sm:group-hover:scale-125 transition-transform duration-700">
+                        <img src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy" class="w-full h-48 sm:h-56 md:h-64 object-cover transform group-hover:scale-110 sm:group-hover:scale-125 transition-transform duration-700">
                         <!-- Бейдж новинки -->
                         <div class="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold shadow-lg sm:shadow-xl border-2 border-white z-20">
                             ⭐ НОВИНКА
