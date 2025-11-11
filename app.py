@@ -97,11 +97,30 @@ def create_app():
                             product_id INTEGER NOT NULL,
                             image_url VARCHAR(500) NOT NULL,
                             is_primary INTEGER DEFAULT 0 NOT NULL,
+                            display_order INTEGER DEFAULT 0 NOT NULL,
                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
                         )
                     """))
                 print("Таблиця product_images успішно створена!")
+            else:
+                # Міграція: додавання колонки display_order до таблиці product_images (якщо не існує)
+                columns = [col['name'] for col in inspector.get_columns('product_images')]
+                if 'display_order' not in columns:
+                    print("Додаємо колонку display_order до таблиці product_images...")
+                    with db.engine.begin() as conn:
+                        conn.execute(text("ALTER TABLE product_images ADD COLUMN display_order INTEGER DEFAULT 0 NOT NULL"))
+                        # Встановлюємо порядок для існуючих зображень
+                        conn.execute(text("""
+                            UPDATE product_images 
+                            SET display_order = (
+                                SELECT COUNT(*) 
+                                FROM product_images p2 
+                                WHERE p2.product_id = product_images.product_id 
+                                AND (p2.created_at < product_images.created_at OR (p2.created_at = product_images.created_at AND p2.id <= product_images.id))
+                            ) - 1
+                        """))
+                    print("Колонка display_order успішно додана!")
         except Exception as e:
             print(f"Помилка при міграції product_images (можливо таблиця вже існує): {e}")
         

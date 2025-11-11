@@ -9,54 +9,56 @@
     <div class="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-300/20 to-indigo-300/20 rounded-tl-full"></div>
     <div class="absolute top-10 right-10 text-4xl">✨</div>
     
-    <div class="md:flex relative z-10">
-        <div class="md:w-1/2 relative overflow-hidden">
+    <div class="relative z-10">
+        <!-- Зображення товару на всю ширину -->
+        <div class="w-full relative overflow-hidden">
             {% if product.main_image or product.image_url %}
-                <div class="relative h-full min-h-[500px]">
+                <div class="relative w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px]">
                     <img id="main-product-image" src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <!-- Бейдж -->
-                    <div class="absolute top-6 right-6 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl border-2 border-white z-30">
+                    <div class="absolute top-4 sm:top-6 right-4 sm:right-6 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold shadow-2xl border-2 border-white z-30">
                         ⭐ ХІТ ПРОДАЖУ
                     </div>
                     
                     <!-- Кнопки перемикання фото -->
                     {% if product.images and product.images|length > 1 %}
-                        <button id="prev-image-btn" onclick="changeImage(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="prev-image-btn" onclick="changeImage(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-2 sm:p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                         </button>
-                        <button id="next-image-btn" onclick="changeImage(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="next-image-btn" onclick="changeImage(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-2 sm:p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </button>
                         <!-- Індикатор поточного фото -->
-                        <div class="absolute top-6 left-6 bg-white/80 text-purple-900 px-4 py-2 rounded-full text-sm font-bold shadow-xl border-2 border-yellow-300 z-30">
+                        <div class="absolute top-4 sm:top-6 left-4 sm:left-6 bg-white/80 text-purple-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-xl border-2 border-yellow-300 z-30">
                             <span id="current-image-index">1</span> / <span id="total-images">{{ product.images|length }}</span>
                         </div>
                     {% endif %}
                     
                     <!-- Галерея зображень (всі зображення включаючи головне) -->
                     {% if product.images and product.images|length > 0 %}
-                        <div class="absolute bottom-4 left-4 right-4 flex gap-2 overflow-x-auto pb-2 z-30">
+                        <div class="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex gap-2 overflow-x-auto pb-2 z-30">
                             {% for img in product.images %}
                                 <img src="{{ img.image_url }}" alt="{{ product.name }}" loading="lazy" 
                                      onclick="goToImage({{ loop.index0 }})"
                                      data-image-index="{{ loop.index0 }}"
-                                     class="thumbnail-image h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border-2 {% if img.is_primary %}border-yellow-500{% else %}border-yellow-300{% endif %} cursor-pointer hover:border-yellow-400 transition-all hover:scale-110 flex-shrink-0">
+                                     class="thumbnail-image h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 object-cover rounded-lg border-2 {% if img.is_primary %}border-yellow-500{% else %}border-yellow-300{% endif %} cursor-pointer hover:border-yellow-400 transition-all hover:scale-110 flex-shrink-0">
                             {% endfor %}
                         </div>
                     {% endif %}
                 </div>
             {% else %}
-                <div class="w-full h-full min-h-[500px] bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex items-center justify-center">
-                    <span class="text-9xl">🎈</span>
+                <div class="w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex items-center justify-center">
+                    <span class="text-6xl sm:text-8xl md:text-9xl">🎈</span>
                 </div>
             {% endif %}
         </div>
-        <div class="md:w-1/2 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-b from-white/95 to-transparent">
+        <!-- Інформація про товар -->
+        <div class="w-full p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-b from-white/95 to-transparent">
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-purple-900 mb-4 sm:mb-6 drop-shadow-lg text-center sm:text-left">
                 {{ product.name }}
             </h1>
@@ -271,13 +273,20 @@
     
     // Ініціалізація при завантаженні сторінки
     document.addEventListener('DOMContentLoaded', function() {
-        // Визначаємо початковий індекс (головне зображення)
+        // Визначаємо початковий індекс (головне зображення, якщо є, інакше перше)
         {% if product.images and product.images|length > 0 %}
+            {% set found_primary = false %}
             {% for img in product.images %}
-                {% if img.is_primary %}
+                {% if img.is_primary and not found_primary %}
                     currentImageIndex = {{ loop.index0 }};
+                    {% set found_primary = true %}
                 {% endif %}
             {% endfor %}
+            {% if not found_primary %}
+                currentImageIndex = 0;
+            {% endif %}
+        {% else %}
+            currentImageIndex = 0;
         {% endif %}
         
         updateImage();

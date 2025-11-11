@@ -1,11 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
+from flask_wtf.csrf import validate_csrf
+from werkzeug.exceptions import BadRequest
 from models import db, Product, Order, OrderItem, User, Category, ProductImage, Settings
 from forms import ProductForm, OrderStatusForm, CategoryForm, TelegramSettingsForm
 from utils import admin_required, save_uploaded_file, delete_file
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from flask_login import current_user
+import re
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -130,49 +133,51 @@ def add_product():
     form = ProductForm()
     
     if form.validate_on_submit():
-        product = Product(
-            name=form.name.data,
-            description=form.description.data,
-            image_url=None,
-            category_id=form.category_id.data if form.category_id.data else None,
-            is_active=form.is_active.data
-        )
-        
-        db.session.add(product)
-        db.session.flush()  # Отримуємо ID товару
-        
-        # Обробка головного зображення
-        if form.image_file.data:
-            image_path = save_uploaded_file(form.image_file.data)
-            if image_path:
-                # Зберігаємо головне зображення як ProductImage з is_primary=True
-                primary_image = ProductImage(
-                    product_id=product.id,
-                    image_url='/' + image_path,
-                    is_primary=True
-                )
-                db.session.add(primary_image)
-                # Також зберігаємо в image_url для зворотної сумісності
-                product.image_url = '/' + image_path
-        
-        # Обробка додаткових зображень
-        if form.image_files.data:
-            # WTForms FileField може приймати кілька файлів через request.files.getlist
-            additional_images = request.files.getlist('image_files')
-            for img_file in additional_images:
-                if img_file and img_file.filename:
-                    img_path = save_uploaded_file(img_file)
-                    if img_path:
-                        product_image = ProductImage(
-                            product_id=product.id,
-                            image_url='/' + img_path,
-                            is_primary=False
-                        )
-                        db.session.add(product_image)
-        
-        db.session.commit()
-        flash('Товар успішно додано', 'success')
-        return redirect(url_for('admin.products'))
+        try:
+            # Обробляємо category_id: якщо 0 або None, встановлюємо None
+            category_id_value = form.category_id.data
+            if category_id_value == 0 or category_id_value is None:
+                category_id_value = None
+            
+            product = Product(
+                name=form.name.data,
+                description=form.description.data,
+                image_url=None,
+                category_id=category_id_value,
+                is_active=form.is_active.data
+            )
+            
+            db.session.add(product)
+            db.session.flush()  # Отримуємо ID товару
+            
+            # Обробка зображень
+            uploaded_images = [img for img in request.files.getlist('image_files') if img and getattr(img, 'filename', '')]
+            saved_index = 0
+            for img_file in uploaded_images:
+                img_path = save_uploaded_file(img_file)
+                if img_path:
+                    is_primary = saved_index == 0
+                    product_image = ProductImage(
+                        product_id=product.id,
+                        image_url='/' + img_path,
+                        is_primary=is_primary,
+                        display_order=saved_index
+                    )
+                    db.session.add(product_image)
+                    if is_primary:
+                        product.image_url = '/' + img_path
+                    saved_index += 1
+            
+            db.session.commit()
+            flash('Товар успішно додано', 'success')
+            return redirect(url_for('admin.products'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Помилка додавання товару: {e}")
+            import traceback
+            traceback.print_exc()
+            flash(f'Помилка додавання товару: {str(e)}', 'error')
     
     return render_template('admin/product_form.html', form=form, title='Додати товар')
 
@@ -190,48 +195,55 @@ def edit_product(product_id):
         form.category_id.data = product.category_id
     
     if form.validate_on_submit():
-        product.name = form.name.data
-        product.description = form.description.data
-        product.category_id = form.category_id.data if form.category_id.data else None
-        product.is_active = form.is_active.data
-        
-        # Обробка головного зображення
-        if form.image_file.data:
-            # Видаляємо старе головне зображення якщо воно локальне
-            old_primary = ProductImage.query.filter_by(product_id=product.id, is_primary=True).first()
-            if old_primary:
-                if old_primary.image_url and old_primary.image_url.startswith('/static/uploads'):
-                    delete_file(old_primary.image_url[1:])  # Прибираємо початковий /
-                db.session.delete(old_primary)
+        try:
+            product.name = form.name.data
+            product.description = form.description.data
+            # Обробляємо category_id: якщо 0 або None, встановлюємо None
+            category_id_value = form.category_id.data
+            if category_id_value == 0 or category_id_value is None:
+                product.category_id = None
+            else:
+                product.category_id = category_id_value
+            product.is_active = form.is_active.data
             
-            # Зберігаємо нове головне зображення
-            image_path = save_uploaded_file(form.image_file.data)
-            if image_path:
-                primary_image = ProductImage(
-                    product_id=product.id,
-                    image_url='/' + image_path,
-                    is_primary=True
-                )
-                db.session.add(primary_image)
-                product.image_url = '/' + image_path
-        
-        # Обробка додаткових зображень
-        if form.image_files.data:
-            additional_images = request.files.getlist('image_files')
-            for img_file in additional_images:
-                if img_file and img_file.filename:
+            # Обробка нових зображень
+            uploaded_images = [img for img in request.files.getlist('image_files') if img and getattr(img, 'filename', '')]
+            if uploaded_images:
+                max_order = db.session.query(db.func.max(ProductImage.display_order)).filter_by(product_id=product.id).scalar()
+                if max_order is None:
+                    max_order = -1
+                saved_index = 0
+                for img_file in uploaded_images:
                     img_path = save_uploaded_file(img_file)
                     if img_path:
+                        if max_order == -1:
+                            display_order = saved_index
+                            is_primary = saved_index == 0
+                        else:
+                            display_order = max_order + 1 + saved_index
+                            is_primary = False
                         product_image = ProductImage(
                             product_id=product.id,
                             image_url='/' + img_path,
-                            is_primary=False
+                            is_primary=is_primary,
+                            display_order=display_order
                         )
                         db.session.add(product_image)
-        
-        db.session.commit()
-        flash('Товар успішно оновлено', 'success')
-        return redirect(url_for('admin.products'))
+                        if is_primary:
+                            product.image_url = '/' + img_path
+                        saved_index += 1
+            
+            db.session.commit()
+            flash('Товар успішно оновлено', 'success')
+            return redirect(url_for('admin.products'))
+            
+        except Exception as e:
+            db.session.rollback()
+            print(f"Помилка збереження товару: {e}")
+            import traceback
+            traceback.print_exc()
+            flash(f'Помилка збереження товару: {str(e)}', 'error')
+            # Залишаємося на сторінці редагування
     
     return render_template('admin/product_form.html', form=form, product=product, title='Редагувати товар')
 
@@ -255,38 +267,109 @@ def toggle_product_status(product_id):
 @admin_required
 def delete_product_image(image_id):
     """Видалити зображення товару"""
-    product_image = ProductImage.query.get_or_404(image_id)
-    product_id = product_image.product_id
-    is_primary = product_image.is_primary
-    
-    # Видаляємо файл якщо він локальний
-    if product_image.image_url and product_image.image_url.startswith('/static/uploads'):
-        delete_file(product_image.image_url[1:])
-    
-    db.session.delete(product_image)
-    
-    # Якщо видаляємо головне зображення, оновлюємо product.image_url
-    if is_primary:
+    try:
+        # Перевіряємо CSRF токен
+        try:
+            validate_csrf(request.form.get('csrf_token'))
+        except BadRequest:
+            flash('Помилка безпеки. Спробуйте ще раз.', 'error')
+            # Спробуємо отримати product_id з referrer або перенаправити назад
+            referrer = request.referrer
+            if referrer and '/products/edit/' in referrer:
+                # Витягуємо product_id з URL
+                match = re.search(r'/products/edit/(\d+)', referrer)
+                if match:
+                    return redirect(url_for('admin.edit_product', product_id=int(match.group(1))))
+            return redirect(url_for('admin.products'))
+        
+        product_image = ProductImage.query.get_or_404(image_id)
+        product_id = product_image.product_id
+        is_primary = product_image.is_primary
+        
+        # Перевіряємо що товар існує
         product = Product.query.get(product_id)
-        if product:
-            # Шукаємо нове головне зображення
-            new_primary = ProductImage.query.filter_by(product_id=product_id, is_primary=True).first()
-            if new_primary:
+        if not product:
+            flash('Товар не знайдено', 'error')
+            return redirect(url_for('admin.products'))
+        
+        # Якщо видаляємо головне зображення, спочатку знаходимо нове головне
+        if is_primary:
+            # Шукаємо інші зображення (крім поточного), сортуємо за порядком
+            other_images = ProductImage.query.filter(
+                ProductImage.product_id == product_id,
+                ProductImage.id != image_id
+            ).order_by(ProductImage.display_order.asc()).all()
+            
+            if other_images:
+                # Спочатку знімаємо is_primary з усіх інших (на випадок якщо є помилка в даних)
+                for img in other_images:
+                    img.is_primary = False
+                
+                # Робимо перше доступне зображення головним (з найменшим порядком)
+                new_primary = other_images[0]
+                new_primary.is_primary = True
+                # Перенумеровуємо порядок: нове головне стає на позицію 0, решта зміщується
+                new_primary_order = new_primary.display_order
+                new_primary.display_order = 0
+                # Зміщуємо всі зображення, які були перед новим головним
+                ProductImage.query.filter(
+                    ProductImage.product_id == product_id,
+                    ProductImage.id != new_primary.id,
+                    ProductImage.display_order < new_primary_order
+                ).update({ProductImage.display_order: ProductImage.display_order + 1})
                 product.image_url = new_primary.image_url
             else:
-                # Якщо немає іншого головного, беремо перше додаткове
-                first_additional = ProductImage.query.filter_by(product_id=product_id, is_primary=False).first()
-                if first_additional:
-                    first_additional.is_primary = True
-                    product.image_url = first_additional.image_url
-                else:
-                    # Якщо немає зображень, очищаємо image_url
-                    product.image_url = None
-    
-    db.session.commit()
-    flash('Зображення успішно видалено', 'success')
-    return redirect(url_for('admin.edit_product', product_id=product_id))
-
+                # Якщо немає інших зображень, очищаємо image_url
+                product.image_url = None
+        
+        # Видаляємо файл якщо він локальний
+        if product_image.image_url and product_image.image_url.startswith('/static/uploads'):
+            try:
+                delete_file(product_image.image_url[1:])
+            except Exception as e:
+                print(f"Помилка видалення файлу: {e}")
+        
+        # Зберігаємо product_id та порядок перед видаленням
+        saved_product_id = int(product_id)
+        deleted_order = product_image.display_order
+        
+        # Видаляємо зображення з бази даних
+        db.session.delete(product_image)
+        
+        # Перенумеровуємо порядок для інших зображень (зменшуємо на 1 для всіх після видаленого)
+        ProductImage.query.filter(
+            ProductImage.product_id == saved_product_id,
+            ProductImage.display_order > deleted_order
+        ).update({ProductImage.display_order: ProductImage.display_order - 1})
+        
+        try:
+            db.session.commit()
+            flash('Зображення успішно видалено', 'success')
+            # Переконуємося, що товар все ще існує перед редиректом
+            product_check = Product.query.get(saved_product_id)
+            if product_check:
+                return redirect(url_for('admin.edit_product', product_id=saved_product_id))
+            else:
+                flash('Товар не знайдено після видалення зображення', 'error')
+                return redirect(url_for('admin.products'))
+        except Exception as commit_error:
+            db.session.rollback()
+            print(f"Помилка commit при видаленні зображення: {commit_error}")
+            flash('Помилка збереження змін. Спробуйте ще раз.', 'error')
+            return redirect(url_for('admin.edit_product', product_id=saved_product_id))
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Помилка видалення зображення: {e}")
+        flash('Помилка видалення зображення. Спробуйте ще раз.', 'error')
+        # Спробуємо перенаправити на сторінку редагування товару
+        try:
+            product_image = ProductImage.query.get(image_id)
+            if product_image:
+                return redirect(url_for('admin.edit_product', product_id=product_image.product_id))
+        except:
+            pass
+        return redirect(url_for('admin.products'))
 
 @admin_bp.route('/products/delete/<int:product_id>', methods=['POST'])
 @login_required

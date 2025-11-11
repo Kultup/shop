@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileAllowed, MultipleFileField
 from wtforms import StringField, PasswordField, TextAreaField, IntegerField, SelectField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
 from models import User, Product, Category
@@ -50,8 +50,7 @@ class ProductForm(FlaskForm):
     """Форма для товару"""
     name = StringField('Назва', validators=[DataRequired(), Length(max=200)])
     description = TextAreaField('Опис')
-    image_file = FileField('Головна фотографія (відображається на картці товару)', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Тільки зображення!')])
-    image_files = FileField('Додаткові фото (відображаються на сторінці товару, можна вибрати кілька)', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Тільки зображення!')])
+    image_files = MultipleFileField('Фото товару (можна вибрати кілька, перше стане головним)', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], 'Тільки зображення!')])
     category_id = SelectField('Категорія', coerce=int, validators=[Optional()])
     is_active = BooleanField('Товар активний (відображається на сайті)', default=True)
     submit = SubmitField('Зберегти')

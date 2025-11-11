@@ -77,7 +77,7 @@ class Product(db.Model):
     # Зв'язки
     cart_items = db.relationship('CartItem', backref='product', lazy=True, cascade='all, delete-orphan')
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
-    images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan', order_by='ProductImage.created_at')
+    images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan', order_by='ProductImage.display_order, ProductImage.created_at')
     
     def __repr__(self):
         return f'<Product {self.name}>'
@@ -99,6 +99,20 @@ class Product(db.Model):
     def additional_images(self):
         """Повертає додаткові зображення (без головного)"""
         return [img for img in self.images if not img.is_primary]
+    
+    @property
+    def image_urls(self):
+        """Повертає всі URL зображень у правильному порядку"""
+        urls = [img.image_url for img in self.images]
+        
+        # Якщо є image_url для зворотної сумісності і воно ще не додане
+        if self.image_url:
+            if not urls:
+                urls.append(self.image_url)
+            elif self.image_url not in urls:
+                urls.insert(0, self.image_url)
+        
+        return urls
 
 
 class ProductImage(db.Model):
@@ -109,6 +123,7 @@ class ProductImage(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     image_url = db.Column(db.String(500), nullable=False)
     is_primary = db.Column(db.Boolean, default=False, nullable=False)  # Чи є головним зображенням
+    display_order = db.Column(db.Integer, default=0, nullable=False)  # Порядок відображення
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
