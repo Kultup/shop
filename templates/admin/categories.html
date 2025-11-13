@@ -29,21 +29,14 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for category in categories %}
                     <!-- Головна категорія -->
-                    <tr class="{% if category.parent %}bg-gray-50{% endif %} hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
-                            <div class="text-xs sm:text-sm font-medium text-gray-900 {% if category.parent %}ml-4{% endif %}">
-                                {% if category.parent %}
-                                    <span class="text-gray-400 mr-2">└─</span>
-                                {% endif %}
+                            <div class="text-xs sm:text-sm font-medium text-gray-900">
                                 {{ category.name }}
                             </div>
                         </td>
                         <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
-                            {% if category.parent %}
-                                <span class="text-xs sm:text-sm text-gray-600">{{ category.parent.name }}</span>
-                            {% else %}
-                                <span class="text-xs sm:text-sm text-gray-400">—</span>
-                            {% endif %}
+                            <span class="text-xs sm:text-sm text-gray-400">—</span>
                         </td>
                         <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
                             {% if category.children %}
@@ -61,7 +54,7 @@
                     </tr>
                     <!-- Підкатегорії -->
                     {% if category.children %}
-                        {% for child in category.children %}
+                        {% for child in category.children|sort(attribute='name') %}
                             <tr class="bg-gray-50 hover:bg-gray-100 transition-colors">
                                 <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
                                     <div class="text-xs sm:text-sm font-medium text-gray-700 ml-6 sm:ml-8">
@@ -69,8 +62,8 @@
                                         {{ child.name }}
                                     </div>
                                 </td>
-                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
-                                    <span class="text-xs sm:text-sm text-gray-600">{{ child.parent.name }}</span>
+                                <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">
+                                    {{ child.parent.name }}
                                 </td>
                                 <td class="px-3 sm:px-4 md:px-6 py-4 whitespace-nowrap">
                                     <span class="text-xs sm:text-sm text-gray-400">—</span>

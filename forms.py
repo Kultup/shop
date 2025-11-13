@@ -39,11 +39,42 @@ class CategoryForm(FlaskForm):
     submit = SubmitField('Зберегти')
     
     def __init__(self, *args, **kwargs):
+        # Видаляємо category_id з kwargs, якщо він є
+        category_id = kwargs.pop('category_id', None)
         super(CategoryForm, self).__init__(*args, **kwargs)
         self.parent_id.choices = [(0, 'Без батьківської категорії')]
+        
+        # Отримуємо всі головні категорії
         categories = Category.query.filter_by(parent_id=None).all()
+        
+        # Якщо редагуємо категорію, виключаємо її та всі її підкатегорії зі списку
+        excluded_ids = set()
+        current_parent_id = None
+        if category_id:
+            excluded_ids.add(category_id)
+            # Додаємо всі підкатегорії поточної категорії
+            category = Category.query.get(category_id)
+            if category:
+                # Зберігаємо поточну батьківську категорію, щоб вона завжди була доступна
+                current_parent_id = category.parent_id
+                def get_all_children(cat):
+                    children_ids = {cat.id}
+                    for child in cat.children:
+                        children_ids.update(get_all_children(child))
+                    return children_ids
+                excluded_ids.update(get_all_children(category))
+        
         for cat in categories:
-            self.parent_id.choices.append((cat.id, cat.name))
+            if cat.id not in excluded_ids:
+                self.parent_id.choices.append((cat.id, cat.name))
+        
+        # Якщо поточна батьківська категорія не в списку (через виключення), додаємо її
+        if current_parent_id and current_parent_id not in [choice[0] for choice in self.parent_id.choices]:
+            parent_cat = Category.query.get(current_parent_id)
+            if parent_cat:
+                # Вставляємо після першого елемента (0, 'Без батьківської категорії')
+                self.parent_id.choices.insert(1, (parent_cat.id, parent_cat.name))
+        
         # Явно встановлюємо значення за замовчуванням на 0 (Без батьківської категорії)
         # якщо значення не було встановлено через obj=category
         if self.parent_id.data is None:

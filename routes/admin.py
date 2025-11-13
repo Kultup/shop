@@ -456,7 +456,12 @@ def update_order_status(order_id):
 @admin_required
 def categories():
     """Список категорій"""
-    categories_list = Category.query.order_by(Category.parent_id, Category.name).all()
+    categories_list = (
+        Category.query
+        .filter_by(parent_id=None)
+        .order_by(Category.name)
+        .all()
+    )
     return render_template('admin/categories.html', categories=categories_list)
 
 
@@ -500,33 +505,46 @@ def add_category():
 def edit_category(category_id):
     """Редагувати категорію"""
     category = Category.query.get_or_404(category_id)
-    form = CategoryForm(obj=category)
+    form = CategoryForm(obj=category, category_id=category_id)
     
-    # Встановлюємо parent_id в формі: якщо є батьківська категорія - встановлюємо її ID, якщо ні - встановлюємо 0
-    if category.parent_id:
-        form.parent_id.data = category.parent_id
-    else:
-        form.parent_id.data = 0  # "Без батьківської категорії"
+    if request.method == 'GET':
+        # Встановлюємо початкове значення тільки для GET-запиту, щоб не перезаписати вибір користувача
+        form.parent_id.data = category.parent_id if category.parent_id else 0
     
     if form.validate_on_submit():
-        category.name = form.name.data
-        # Явно перевіряємо, чи вибрано батьківську категорію (0 означає "Без батьківської категорії")
-        parent_id_value = form.parent_id.data
-        category.parent_id = None
-        
-        # Додаткова перевірка: якщо значення не встановлено або дорівнює 0, то parent_id = None
-        if parent_id_value is not None and parent_id_value != 0:
-            # Перевіряємо, чи категорія з таким ID існує
-            parent_category = Category.query.get(parent_id_value)
-            if parent_category:
-                category.parent_id = parent_id_value
+        try:
+            category.name = form.name.data
+            # Явно перевіряємо, чи вибрано батьківську категорію (0 означає "Без батьківської категорії")
+            parent_id_value = form.parent_id.data
+            
+            # Зберігаємо старе значення для порівняння
+            old_parent_id = category.parent_id
+            
+            # Додаткова перевірка: якщо значення не встановлено або дорівнює 0, то parent_id = None
+            if parent_id_value is not None and parent_id_value != 0:
+                # Перевіряємо, чи категорія з таким ID існує
+                parent_category = Category.query.get(parent_id_value)
+                if parent_category:
+                    # Перевіряємо, чи не намагаємося встановити категорію як батьківську саму для себе
+                    if parent_id_value != category_id:
+                        category.parent_id = parent_id_value
+                    else:
+                        flash('Категорія не може бути батьківською для самої себе', 'error')
+                        return render_template('admin/category_form.html', form=form, category=category, title='Редагувати категорію')
+                else:
+                    # Якщо категорія не знайдена, встановлюємо None
+                    category.parent_id = None
             else:
-                # Якщо категорія не знайдена, встановлюємо None
+                # Якщо вибрано "Без батьківської категорії" (0 або None)
                 category.parent_id = None
-        
-        db.session.commit()
-        flash('Категорію успішно оновлено', 'success')
-        return redirect(url_for('admin.categories'))
+            
+            db.session.commit()
+            flash('Категорію успішно оновлено', 'success')
+            return redirect(url_for('admin.categories'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Помилка при оновленні категорії: {str(e)}', 'error')
+            return render_template('admin/category_form.html', form=form, category=category, title='Редагувати категорію')
     
     return render_template('admin/category_form.html', form=form, category=category, title='Редагувати категорію')
 
