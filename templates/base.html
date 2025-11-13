@@ -26,21 +26,6 @@
         @media (min-width: 1024px) {
             .sidebar-overlay { display: none !important; }
         }
-        .bounce-hover:hover {
-            animation: bounce 0.6s ease infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .wiggle:hover {
-            animation: wiggle 0.5s ease-in-out infinite;
-        }
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            75% { transform: rotate(-5deg); }
-        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 min-h-screen">
@@ -48,14 +33,14 @@
     <header class="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 shadow-lg border-b-2 sm:border-b-4 border-yellow-400 fixed top-0 left-0 right-0 z-40 h-16 sm:h-[4.5rem] md:h-20">
         <div class="flex items-center justify-between h-full px-2 sm:px-3 md:px-4">
             <!-- Кнопка меню для мобільних -->
-            <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg text-white hover:text-yellow-200 hover:bg-white/20 transition-all">
+            <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg text-white transition-all">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
             
             <!-- Логотип -->
-            <a href="{{ url_for('main.index') }}" class="text-base sm:text-xl md:text-2xl font-bold text-white hover:text-yellow-200 transition-all bounce-hover flex items-center gap-1 sm:gap-2 flex-1 sm:flex-initial">
+            <a href="{{ url_for('main.index') }}" class="text-base sm:text-xl md:text-2xl font-bold text-white transition-all flex items-center gap-1 sm:gap-2 flex-1 sm:flex-initial">
                 <span class="text-xl sm:text-2xl md:text-3xl">🎈</span>
                 <span class="hidden sm:inline">Країна Мрій 🌈</span>
                 <span class="sm:hidden">Країна Мрій 🌈</span>
@@ -66,7 +51,7 @@
             <div class="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
                 {% if current_user.is_authenticated %}
                     <!-- Кошик -->
-                    <a href="{{ url_for('main.cart') }}" class="relative p-1.5 sm:p-2 text-white hover:text-yellow-200 hover:bg-white/20 rounded-xl transition-all group bounce-hover">
+                    <a href="{{ url_for('main.cart') }}" class="relative p-1.5 sm:p-2 text-white rounded-xl transition-all group">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
@@ -78,16 +63,16 @@
                     </a>
                     
                     <span class="hidden md:inline text-white text-sm font-medium">Привіт, {{ current_user.username }}! 👋</span>
-                    <a href="{{ url_for('auth.logout') }}" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all shadow-lg hover:shadow-xl">
+                    <a href="{{ url_for('auth.logout') }}" class="bg-red-500 text-white px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all shadow-lg">
                         <span class="hidden sm:inline">Вийти</span>
                         <span class="sm:hidden">✕</span>
                     </a>
                 {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="text-white hover:text-yellow-200 px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all hover:bg-white/20">
+                    <a href="{{ url_for('auth.login') }}" class="text-white px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all">
                         <span class="hidden sm:inline">Увійти</span>
                         <span class="sm:hidden">→</span>
                     </a>
-                    <a href="{{ url_for('auth.register') }}" class="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all bounce-hover">
+                    <a href="{{ url_for('auth.register') }}" class="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold shadow-lg transition-all">
                         <span class="hidden md:inline">Реєстрація 🎉</span>
                         <span class="md:hidden">🎉</span>
                     </a>
@@ -104,23 +89,23 @@
         <nav class="h-full overflow-y-auto py-6">
             <div class="px-4 space-y-1">
                 <!-- Головні посилання -->
-                <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                <a href="{{ url_for('main.index') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                     <span class="text-2xl mr-3">🏠</span>
                     <span class="font-bold text-lg">Каталог</span>
                 </a>
                 
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.cart') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                    <a href="{{ url_for('main.cart') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                         <span class="text-2xl mr-3">🛒</span>
                         <span class="font-bold text-lg">Кошик</span>
                     </a>
                     
-                    <a href="{{ url_for('main.orders') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                    <a href="{{ url_for('main.orders') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                         <span class="text-2xl mr-3">📦</span>
                         <span class="font-bold text-lg">Мої замовлення</span>
                     </a>
                     
-                    <a href="{{ url_for('auth.profile') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                    <a href="{{ url_for('auth.profile') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                         <span class="text-2xl mr-3">👤</span>
                         <span class="font-bold text-lg">Профіль</span>
                     </a>
@@ -130,32 +115,32 @@
                     <div class="pt-4 mt-4 border-t-4 border-yellow-400">
                         <p class="px-4 text-sm font-bold text-purple-900 uppercase tracking-wider mb-3">🎯 Адмін-панель</p>
                         
-                        <a href="{{ url_for('admin.dashboard') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.dashboard') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">📊</span>
                             <span class="font-bold text-lg">Панель управління</span>
                         </a>
                         
-                        <a href="{{ url_for('admin.products') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.products') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">🎁</span>
                             <span class="font-bold text-lg">Товари</span>
                         </a>
                         
-                        <a href="{{ url_for('admin.categories') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.categories') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">🏷️</span>
                             <span class="font-bold text-lg">Категорії</span>
                         </a>
                         
-                        <a href="{{ url_for('admin.orders') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.orders') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">📋</span>
                             <span class="font-bold text-lg">Замовлення</span>
                         </a>
                         
-                        <a href="{{ url_for('admin.users') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.users') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">👥</span>
                             <span class="font-bold text-lg">Користувачі</span>
                         </a>
                         
-                        <a href="{{ url_for('admin.telegram_settings') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl hover:bg-gradient-to-r hover:from-pink-300 hover:to-purple-300 hover:text-white transition-all group bounce-hover shadow-md hover:shadow-lg">
+                        <a href="{{ url_for('admin.telegram_settings') }}" class="flex items-center px-4 py-3 text-purple-800 rounded-xl transition-all group shadow-md">
                             <span class="text-2xl mr-3">📱</span>
                             <span class="font-bold text-lg">Telegram</span>
                         </a>
@@ -231,17 +216,6 @@
             sidebar.classList.remove('sidebar-hidden');
         }
         
-        // Додаємо анімацію для елементів
-        const animatedElements = document.querySelectorAll('.bounce-hover');
-        animatedElements.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                el.style.animation = 'bounce 0.6s ease infinite';
-            });
-            el.addEventListener('mouseleave', () => {
-                el.style.animation = '';
-            });
-        });
-        
         // Модальне вікно для підтвердження
         function showConfirmModal(message, callback) {
             const modal = document.createElement('div');
@@ -257,10 +231,10 @@
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Підтвердження</h3>
                         <p class="text-sm text-gray-600 mb-6">${message}</p>
                         <div class="flex gap-3 justify-center">
-                            <button id="confirm-cancel" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors">
+                            <button id="confirm-cancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium transition-colors">
                                 Скасувати
                             </button>
-                            <button id="confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
+                            <button id="confirm-ok" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium transition-colors">
                                 Підтвердити
                             </button>
                         </div>
@@ -460,7 +434,7 @@
             toast.innerHTML = `
                 <span class="text-xl flex-shrink-0">${config.icon}</span>
                 <span class="flex-1 text-sm sm:text-base font-medium">${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 flex-shrink-0 text-lg font-bold">×</button>
+                <button onclick="this.parentElement.remove()" class="text-white flex-shrink-0 text-lg font-bold">×</button>
             `;
             
             toastContainer.appendChild(toast);

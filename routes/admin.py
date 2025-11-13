@@ -468,7 +468,19 @@ def add_category():
     form = CategoryForm()
     
     if form.validate_on_submit():
-        parent_id = form.parent_id.data if form.parent_id.data else None
+        # Явно перевіряємо, чи вибрано батьківську категорію (0 означає "Без батьківської категорії")
+        parent_id = None
+        parent_id_value = form.parent_id.data
+        
+        # Додаткова перевірка: якщо значення не встановлено або дорівнює 0, то parent_id = None
+        if parent_id_value is not None and parent_id_value != 0:
+            # Перевіряємо, чи категорія з таким ID існує
+            parent_category = Category.query.get(parent_id_value)
+            if parent_category:
+                parent_id = parent_id_value
+            else:
+                # Якщо категорія не знайдена, встановлюємо None
+                parent_id = None
         
         category = Category(
             name=form.name.data,
@@ -490,12 +502,27 @@ def edit_category(category_id):
     category = Category.query.get_or_404(category_id)
     form = CategoryForm(obj=category)
     
+    # Встановлюємо parent_id в формі: якщо є батьківська категорія - встановлюємо її ID, якщо ні - встановлюємо 0
     if category.parent_id:
         form.parent_id.data = category.parent_id
+    else:
+        form.parent_id.data = 0  # "Без батьківської категорії"
     
     if form.validate_on_submit():
         category.name = form.name.data
-        category.parent_id = form.parent_id.data if form.parent_id.data else None
+        # Явно перевіряємо, чи вибрано батьківську категорію (0 означає "Без батьківської категорії")
+        parent_id_value = form.parent_id.data
+        category.parent_id = None
+        
+        # Додаткова перевірка: якщо значення не встановлено або дорівнює 0, то parent_id = None
+        if parent_id_value is not None and parent_id_value != 0:
+            # Перевіряємо, чи категорія з таким ID існує
+            parent_category = Category.query.get(parent_id_value)
+            if parent_category:
+                category.parent_id = parent_id_value
+            else:
+                # Якщо категорія не знайдена, встановлюємо None
+                category.parent_id = None
         
         db.session.commit()
         flash('Категорію успішно оновлено', 'success')

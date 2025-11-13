@@ -14,7 +14,7 @@
         <div class="w-full relative overflow-hidden">
             {% if product.main_image or product.image_url %}
                 <div class="relative w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px]">
-                    <img id="main-product-image" src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700">
+                    <img id="main-product-image" src="{{ product.main_image }}" alt="{{ product.name }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     <!-- Бейдж -->
                     <div class="absolute top-4 sm:top-6 right-4 sm:right-6 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-bold shadow-2xl border-2 border-white z-30">
@@ -23,12 +23,12 @@
                     
                     <!-- Кнопки перемикання фото -->
                     {% if product.images and product.images|length > 1 %}
-                        <button id="prev-image-btn" onclick="changeImage(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-2 sm:p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
+                        <button id="prev-image-btn" onclick="changeImage(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 text-purple-900 p-2 sm:p-3 rounded-full shadow-xl transition-all z-30 border-2 border-yellow-300">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
                         </button>
-                        <button id="next-image-btn" onclick="changeImage(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-purple-900 p-2 sm:p-3 rounded-full shadow-xl hover:shadow-2xl transition-all z-30 transform hover:scale-110 border-2 border-yellow-300">
+                        <button id="next-image-btn" onclick="changeImage(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 text-purple-900 p-2 sm:p-3 rounded-full shadow-xl transition-all z-30 border-2 border-yellow-300">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -46,7 +46,7 @@
                                 <img src="{{ img.image_url }}" alt="{{ product.name }}" loading="lazy" 
                                      onclick="goToImage({{ loop.index0 }})"
                                      data-image-index="{{ loop.index0 }}"
-                                     class="thumbnail-image h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 object-cover rounded-lg border-2 {% if img.is_primary %}border-yellow-500{% else %}border-yellow-300{% endif %} cursor-pointer hover:border-yellow-400 transition-all hover:scale-110 flex-shrink-0">
+                                     class="thumbnail-image h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 object-cover rounded-lg border-2 {% if img.is_primary %}border-yellow-500{% else %}border-yellow-300{% endif %} cursor-pointer transition-all flex-shrink-0">
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -98,7 +98,7 @@
                         </label>
                         <div class="flex items-center justify-center gap-2 sm:gap-3">
                             <!-- Кнопка зменшення -->
-                            <button type="button" onclick="decreaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl hover:scale-110 active:scale-95">
+                            <button type="button" onclick="decreaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-xl sm:rounded-2xl shadow-lg transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl active:scale-95">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"></path>
                                 </svg>
@@ -107,7 +107,7 @@
                             <input type="number" name="quantity" id="quantity" value="1" min="1" 
                                    class="w-20 sm:w-24 md:w-28 px-2 sm:px-4 py-2 sm:py-3 border-2 border-purple-300 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-base sm:text-lg md:text-xl font-bold text-purple-900 text-center appearance-none">
                             <!-- Кнопка збільшення -->
-                            <button type="button" onclick="increaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl hover:scale-110 active:scale-95">
+                            <button type="button" onclick="increaseQuantity()" class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-xl sm:rounded-2xl shadow-lg transition-all border-2 border-white/50 flex items-center justify-center font-bold text-lg sm:text-xl active:scale-95">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -116,7 +116,7 @@
                     </div>
                     <!-- Контейнер для кнопки та посилання -->
                     <div class="bg-white/80 rounded-xl sm:rounded-2xl border border-yellow-200 p-4 sm:p-5">
-                        <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl shadow-lg sm:shadow-xl hover:shadow-xl sm:hover:shadow-2xl transition-all relative mb-4">
+                        <button type="submit" id="add-to-cart-btn" class="w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl shadow-lg sm:shadow-xl transition-all relative mb-4">
                             <span id="add-to-cart-text" class="flex items-center justify-center gap-2 sm:gap-3">
                                 <!-- Сіра іконка кошика -->
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -137,7 +137,7 @@
                             </span>
                         </button>
                         <!-- Посилання повернення -->
-                        <a href="{{ url_for('main.index') }}" class="block text-center text-purple-700 hover:text-pink-600 font-bold text-base sm:text-lg transition-colors flex items-center justify-center gap-2">
+                        <a href="{{ url_for('main.index') }}" class="block text-center text-purple-700 font-bold text-base sm:text-lg transition-colors flex items-center justify-center gap-2">
                             <span>←</span>
                             <span>Повернутися до каталогу</span>
                         </a>
@@ -148,7 +148,7 @@
                     <p class="text-purple-900 font-bold text-base sm:text-lg mb-4 text-center">🔐 Увійдіть, щоб додати товар до кошика</p>
                 </div>
                 <div class="bg-white/80 rounded-xl sm:rounded-2xl border border-yellow-200 p-4 sm:p-5">
-                    <a href="{{ url_for('auth.login') }}" class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl text-center shadow-lg sm:shadow-xl hover:shadow-xl sm:hover:shadow-2xl transition-all mb-4">
+                    <a href="{{ url_for('auth.login') }}" class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-lg sm:text-xl text-center shadow-lg sm:shadow-xl transition-all mb-4">
                         <span class="flex items-center justify-center gap-2 sm:gap-3">
                             <span>🚪</span>
                             <span>Увійти</span>

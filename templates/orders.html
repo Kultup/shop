@@ -14,7 +14,7 @@
 {% if orders %}
     <div class="space-y-4 sm:space-y-6 px-2 sm:px-0">
         {% for order in orders %}
-            <div class="bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-xl border-2 sm:border-4 border-yellow-300 p-4 sm:p-5 md:p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-xl border-2 sm:border-4 border-yellow-300 p-4 sm:p-5 md:p-6 transition-all duration-300">
                 <!-- Заголовок замовлення -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-5 pb-4 sm:pb-5 border-b-2 border-purple-200">
                     <div class="flex-1">
@@ -64,7 +64,7 @@
                     </h3>
                     <ul class="space-y-2 sm:space-y-3">
                         {% for item in order.items %}
-                            <li class="bg-white/80 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-100 hover:border-pink-300 transition-colors">
+                            <li class="bg-white/80 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-100 transition-colors">
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="text-sm sm:text-base font-medium text-purple-900 flex-1">
                                         <span class="text-lg sm:text-xl mr-2">🎁</span>
@@ -84,7 +84,7 @@
                     <div class="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t-2 border-purple-200">
                         <form method="POST" action="{{ url_for('main.cancel_order', order_id=order.id) }}" class="cancel-order-form" data-order-id="{{ order.id }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all">
+                            <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-sm sm:text-base shadow-lg transition-all">
                                 ❌ Скасувати замовлення
                             </button>
                         </form>
@@ -98,7 +98,7 @@
         <div class="text-6xl sm:text-8xl mb-4">📦</div>
         <p class="text-purple-900 text-xl sm:text-2xl font-bold mb-3 sm:mb-4">У вас немає замовлень! 😔</p>
         <p class="text-purple-700 text-base sm:text-lg mb-5 sm:mb-6">Створіть перше замовлення, щоб побачити його тут! 🎁</p>
-        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all font-bold text-base sm:text-lg bounce-hover">
+        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg transition-all font-bold text-base sm:text-lg">
             <span class="flex items-center justify-center gap-2">
                 <span>🏠</span>
                 <span>Перейти до каталогу</span>

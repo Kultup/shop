@@ -35,7 +35,23 @@ def index():
         query = query.filter(Product.name.contains(search) | Product.description.contains(search))
     
     if category_id:
-        query = query.filter(Product.category_id == category_id)
+        # Перевіряємо чи це основна категорія (має підкатегорії)
+        category = Category.query.get(category_id)
+        if category:
+            # Отримуємо всі ID категорій (основна + всі підкатегорії)
+            category_ids = [category_id]
+            
+            # Рекурсивно отримуємо всі підкатегорії
+            def get_all_children(cat_id):
+                children = Category.query.filter_by(parent_id=cat_id).all()
+                for child in children:
+                    category_ids.append(child.id)
+                    get_all_children(child.id)  # Рекурсивно для вкладених підкатегорій
+            
+            get_all_children(category_id)
+            query = query.filter(Product.category_id.in_(category_ids))
+        else:
+            query = query.filter(Product.category_id == category_id)
     
     # Сортування
     # Спочатку активні товари, потім неактивні
@@ -325,3 +341,69 @@ def get_cart():
     } for item in cart_items]
     return jsonify({'cart': cart_data})
 
+
+@main_bp.route('/api/cart/add/<int:product_id>', methods=['POST'])
+@check_user_blocked
+def api_add_to_cart(product_id):
+    """API endpoint для швидкого додавання товару до кошика"""
+    try:
+        # Перевіряємо чи користувач авторизований
+        if not current_user.is_authenticated:
+            return jsonify({
+                'success': False,
+                'message': 'Будь ласка, увійдіть для додавання товарів до кошика',
+                'requires_login': True
+            }), 401
+        
+        product = Product.query.get_or_404(product_id)
+        
+        # Перевіряємо чи товар активний
+        if not product.is_active:
+            return jsonify({
+                'success': False,
+                'message': 'Цей товар зараз недоступний'
+            }), 400
+        
+        quantity = request.json.get('quantity', 1) if request.is_json else request.form.get('quantity', 1, type=int)
+        
+        if quantity <= 0:
+            return jsonify({
+                'success': False,
+                'message': 'Кількість повинна бути більше 0'
+            }), 400
+        
+        # Перевіряємо чи товар вже в кошику
+        cart_item = CartItem.query.filter_by(
+            user_id=current_user.id,
+            product_id=product_id
+        ).first()
+        
+        if cart_item:
+            cart_item.quantity += quantity
+        else:
+            cart_item = CartItem(
+                user_id=current_user.id,
+                product_id=product_id,
+                quantity=quantity
+            )
+            db.session.add(cart_item)
+        
+        db.session.commit()
+        
+        # Отримуємо оновлену кількість товарів у кошику
+        cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+        cart_count = sum(item.quantity for item in cart_items)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Товар додано до кошика',
+            'cart_count': cart_count
+        })
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': f'Помилка: {str(e)}'
+        }), 500

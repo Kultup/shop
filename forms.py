@@ -44,6 +44,10 @@ class CategoryForm(FlaskForm):
         categories = Category.query.filter_by(parent_id=None).all()
         for cat in categories:
             self.parent_id.choices.append((cat.id, cat.name))
+        # Явно встановлюємо значення за замовчуванням на 0 (Без батьківської категорії)
+        # якщо значення не було встановлено через obj=category
+        if self.parent_id.data is None:
+            self.parent_id.data = 0
 
 
 class ProductForm(FlaskForm):

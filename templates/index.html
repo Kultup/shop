@@ -6,6 +6,25 @@
 <div class="mb-4 sm:mb-6 px-2 sm:px-0">
     <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 mb-4 sm:mb-6 text-center drop-shadow-lg">🎨 Каталог іграшок 🎨</h1>
     
+    <!-- Категорії -->
+    {% if categories %}
+        <div class="bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-4 border-yellow-400 mb-4 sm:mb-6">
+            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 mb-3 sm:mb-4 text-center">🏷️ Категорії товарів</h2>
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                <a href="{{ url_for('main.index') }}" 
+                   class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-md {% if not current_category_id %}bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white border-2 border-white{% else %}bg-white text-purple-900 border-2 border-purple-300{% endif %}">
+                    Всі товари
+                </a>
+                {% for cat in categories %}
+                    <a href="{{ url_for('main.index', category=cat.id) }}" 
+                       class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base transition-all shadow-md {% if cat.id == current_category_id %}bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white border-2 border-white{% else %}bg-white text-purple-900 border-2 border-purple-300{% endif %}">
+                        {{ cat.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
     <!-- Пошук та фільтри -->
     <div class="bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-200 p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-4 border-yellow-400 mb-4 sm:mb-6">
         <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -29,12 +48,12 @@
             </select>
             
             <div class="flex gap-2 sm:gap-4">
-                <button type="submit" class="flex-1 sm:flex-initial bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all font-bold text-base sm:text-lg bounce-hover">
+                <button type="submit" class="flex-1 sm:flex-initial bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all font-bold text-base sm:text-lg">
                     <span class="hidden sm:inline">🔍 Шукати</span>
                     <span class="sm:hidden">🔍</span>
                 </button>
                 {% if search or current_category_id or sort_by != 'newest' %}
-                    <a href="{{ url_for('main.index') }}" class="flex-1 sm:flex-initial bg-gradient-to-r from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all font-bold text-base sm:text-lg text-center">
+                    <a href="{{ url_for('main.index') }}" class="flex-1 sm:flex-initial bg-gradient-to-r from-gray-400 to-gray-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-lg transition-all font-bold text-base sm:text-lg text-center">
                         <span class="hidden sm:inline">🔄 Скинути</span>
                         <span class="sm:hidden">🔄</span>
                     </a>
@@ -48,7 +67,8 @@
 {% if products.items %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-0">
         {% for product in products.items %}
-            <div class="group relative bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border-2 sm:border-4 border-yellow-300 overflow-hidden hover:shadow-2xl sm:hover:shadow-3xl hover:-translate-y-2 sm:hover:-translate-y-3 transition-all duration-500 transform sm:rotate-1 hover:rotate-0 hover:scale-105 {% if not product.is_active %}opacity-50 grayscale{% endif %}">
+            <a href="{% if product.is_active %}{{ url_for('main.product_detail', product_id=product.id) }}{% else %}#{% endif %}" 
+               class="group relative bg-gradient-to-br from-white via-pink-50 via-purple-50 to-indigo-50 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl border-2 sm:border-4 border-yellow-300 overflow-hidden {% if not product.is_active %}opacity-50 grayscale cursor-not-allowed{% else %}cursor-pointer{% endif %} block">
                 <!-- Декоративні елементи -->
                 <div class="absolute top-0 left-0 w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-300/30 to-pink-300/30 rounded-br-full -z-0"></div>
                 <div class="absolute bottom-0 right-0 w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-tl from-purple-300/30 to-indigo-300/30 rounded-tl-full -z-0"></div>
@@ -66,7 +86,7 @@
                          aria-live="polite">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none"></div>
                         <img src="{{ image_urls[0] }}" alt="{{ product.name }}" loading="lazy" decoding="async"
-                             class="w-full h-48 sm:h-56 md:h-64 object-cover transform group-hover:scale-110 sm:group-hover:scale-125 transition-transform duration-700 product-card-photo transition-opacity duration-500 ease-out opacity-100"
+                             class="w-full h-48 sm:h-56 md:h-64 object-cover product-card-photo transition-opacity duration-500 ease-out opacity-100"
                              data-role="product-image"
                              data-current-index="0"
                              draggable="false">
@@ -78,22 +98,24 @@
                         <div class="absolute top-2 left-2 sm:top-3 sm:left-3 text-xl sm:text-3xl z-30">✨</div>
                         {% if has_multiple_images %}
                             <button type="button"
-                                    class="product-card-nav absolute top-1/2 left-2 sm:left-3 -translate-y-1/2 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 text-purple-700 shadow-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 z-40 transition"
+                                    class="product-card-nav absolute top-1/2 left-2 sm:left-3 -translate-y-1/2 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 text-purple-700 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 z-40 transition"
                                     data-action="prev"
-                                    aria-label="Попереднє фото">
+                                    aria-label="Попереднє фото"
+                                    onclick="event.stopPropagation();">
                                 <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
                             <button type="button"
-                                    class="product-card-nav absolute top-1/2 right-2 sm:right-3 -translate-y-1/2 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 text-purple-700 shadow-lg hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 z-40 transition"
+                                    class="product-card-nav absolute top-1/2 right-2 sm:right-3 -translate-y-1/2 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 text-purple-700 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-400 z-40 transition"
                                     data-action="next"
-                                    aria-label="Наступне фото">
+                                    aria-label="Наступне фото"
+                                    onclick="event.stopPropagation();">
                                 <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                 </svg>
                             </button>
-                            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40">
+                            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-40" onclick="event.stopPropagation();">
                                 {% for url in image_urls %}
                                     <button type="button"
                                             class="product-card-dot w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-white/60 transition duration-200 ease-out transform {% if loop.first %}bg-white opacity-100 scale-110 ring-2 ring-pink-400{% else %}bg-white/40 opacity-80{% endif %}"
@@ -112,7 +134,7 @@
                 {% endif %}
                 
                 <div class="p-4 sm:p-5 md:p-6 relative z-10 bg-gradient-to-b from-white/95 to-transparent">
-                    <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 mb-2 sm:mb-3 group-hover:text-pink-600 transition-colors drop-shadow-md line-clamp-2">
+                    <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 mb-2 sm:mb-3 transition-colors drop-shadow-md line-clamp-2">
                         {{ product.name }}
                     </h3>
                     {% if product.description %}
@@ -120,27 +142,17 @@
                             {{ product.description }}
                         </p>
                     {% endif %}
-                    {% if product.category_obj %}
-                        <span class="inline-flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-[10px] sm:text-xs px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full mb-4 sm:mb-5 font-bold shadow-md sm:shadow-lg border-2 border-white/50">
-                            <span class="text-sm sm:text-lg">🏷️</span>
-                            <span class="truncate max-w-[120px] sm:max-w-none">{{ product.category_obj.full_path }}</span>
-                        </span>
-                    {% elif product.category %}
-                        <span class="inline-flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-purple-900 text-[10px] sm:text-xs px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-full mb-4 sm:mb-5 font-bold shadow-md sm:shadow-lg border-2 border-white/50">
-                            <span class="text-sm sm:text-lg">🏷️</span>
-                            <span class="truncate max-w-[120px] sm:max-w-none">{{ product.category }}</span>
-                        </span>
-                    {% endif %}
                     {% if product.is_active %}
-                        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" 
-                           class="block w-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white text-center py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl hover:shadow-xl sm:hover:shadow-2xl transition-all font-bold text-base sm:text-lg border-2 border-white/50 transform hover:scale-105">
-                            <span class="flex items-center justify-center gap-1 sm:gap-2">
-                                <span>🎯</span>
-                                <span class="hidden sm:inline">Детальніше</span>
-                                <span class="sm:hidden">Детальніше</span>
-                                <span class="group-hover:translate-x-1 transition-transform hidden sm:inline">→</span>
-                            </span>
-                        </a>
+                        {% if current_user.is_authenticated %}
+                            <button onclick="quickAddToCart({{ product.id }}, event)" 
+                                    class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-center py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl transition-all font-bold text-base sm:text-lg border-2 border-white/50 quick-add-btn relative z-20">
+                                <span class="flex items-center justify-center gap-1 sm:gap-2">
+                                    <span>🛒</span>
+                                    <span class="hidden sm:inline">Додати до кошика</span>
+                                    <span class="sm:hidden">Додати</span>
+                                </span>
+                            </button>
+                        {% endif %}
                     {% else %}
                         <div class="block w-full bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 text-white text-center py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl font-bold text-base sm:text-lg border-2 border-white/50 cursor-not-allowed opacity-75">
                             <span class="flex items-center justify-center gap-1 sm:gap-2">
@@ -151,7 +163,7 @@
                         </div>
                     {% endif %}
                 </div>
-            </div>
+            </a>
         {% endfor %}
     </div>
 
@@ -161,7 +173,7 @@
             <nav class="flex space-x-1 sm:space-x-2">
                 {% if products.has_prev %}
                     <a href="{{ url_for('main.index', page=products.prev_num, search=search, category=current_category_id, sort=sort_by) }}" 
-                       class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-yellow-400 rounded-lg sm:rounded-xl hover:from-pink-400 hover:to-purple-400 hover:shadow-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
+                       class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-yellow-400 rounded-lg sm:rounded-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
                         <span class="hidden sm:inline">← Попередня</span>
                         <span class="sm:hidden">←</span>
                     </a>
@@ -173,7 +185,7 @@
                             <span class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white rounded-lg sm:rounded-xl shadow-lg sm:shadow-xl font-bold text-sm sm:text-base md:text-lg whitespace-nowrap">{{ page_num }}</span>
                         {% else %}
                             <a href="{{ url_for('main.index', page=page_num, search=search, category=current_category_id, sort=sort_by) }}" 
-                               class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-200 to-purple-200 border-2 border-yellow-400 rounded-lg sm:rounded-xl hover:from-pink-300 hover:to-purple-300 hover:shadow-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
+                               class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-200 to-purple-200 border-2 border-yellow-400 rounded-lg sm:rounded-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
                                 {{ page_num }}
                             </a>
                         {% endif %}
@@ -184,7 +196,7 @@
                 
                 {% if products.has_next %}
                     <a href="{{ url_for('main.index', page=products.next_num, search=search, category=current_category_id, sort=sort_by) }}" 
-                       class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-yellow-400 rounded-lg sm:rounded-xl hover:from-pink-400 hover:to-purple-400 hover:shadow-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
+                       class="px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-yellow-400 rounded-lg sm:rounded-xl transition-all font-bold text-purple-900 text-sm sm:text-base shadow-lg whitespace-nowrap">
                         <span class="hidden sm:inline">Наступна →</span>
                         <span class="sm:hidden">→</span>
                     </a>
@@ -196,7 +208,7 @@
     <div class="bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 p-6 sm:p-8 md:p-10 rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-4 border-yellow-400 text-center mx-2 sm:mx-0">
         <p class="text-purple-900 text-xl sm:text-2xl font-bold mb-3 sm:mb-4">🎈 Товарів не знайдено 🎈</p>
         <p class="text-purple-700 text-base sm:text-lg mb-4 sm:mb-6">Спробуйте інші ключові слова або перегляньте всі товари!</p>
-        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-300 hover:via-pink-400 hover:to-purple-400 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all font-bold text-base sm:text-lg bounce-hover">
+        <a href="{{ url_for('main.index') }}" class="inline-block bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg transition-all font-bold text-base sm:text-lg">
             🎯 Переглянути всі товари
         </a>
     </div>
@@ -337,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (prevBtn) {
             prevBtn.addEventListener('click', (event) => {
                 event.preventDefault();
+                event.stopPropagation();
                 switchTo(currentIndex - 1, { force: true });
             });
         }
@@ -344,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nextBtn) {
             nextBtn.addEventListener('click', (event) => {
                 event.preventDefault();
+                event.stopPropagation();
                 switchTo(currentIndex + 1, { force: true });
             });
         }
@@ -351,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dots.forEach((dot) => {
             dot.addEventListener('click', (event) => {
                 event.preventDefault();
+                event.stopPropagation();
                 const dotIndex = Number.parseInt(dot.getAttribute('data-index') || '-1', 10);
                 if (!Number.isNaN(dotIndex)) {
                     switchTo(dotIndex, { force: true });
@@ -428,6 +443,110 @@ document.addEventListener('DOMContentLoaded', () => {
         setActiveDot();
     });
 });
+</script>
+
+<script>
+// Функція швидкого додавання до кошика (глобальна, щоб була доступна для onclick)
+function quickAddToCart(productId, event) {
+    // Зупиняємо поширення події, щоб не спрацював клік на картці
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const btn = (event && event.target.closest('.quick-add-btn')) || document.querySelector(`button[onclick*="${productId}"]`);
+    if (!btn) return;
+    
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Додавання...</span></span>';
+    
+    fetch(`/api/cart/add/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ quantity: 1 })
+    })
+    .then(response => {
+        // Перевіряємо чи потрібна авторизація
+        if (response.status === 401) {
+            return response.json().then(data => {
+                if (data.requires_login) {
+                    if (typeof showToast === 'function') {
+                        showToast('Будь ласка, увійдіть для додавання товарів до кошика', 'warning');
+                    } else {
+                        alert('Будь ласка, увійдіть для додавання товарів до кошика');
+                    }
+                    // Перенаправляємо на сторінку входу через 1 секунду
+                    setTimeout(() => {
+                        window.location.href = '{{ url_for("auth.login") }}';
+                    }, 1000);
+                }
+                throw new Error(data.message || 'Потрібна авторизація');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            btn.innerHTML = '<span class="flex items-center justify-center gap-2"><span>✅</span><span>Додано!</span></span>';
+                    btn.classList.remove('from-green-500', 'to-emerald-600');
+            btn.classList.add('from-green-600', 'to-green-700');
+            
+            // Оновлюємо лічильник кошика в шапці
+            if (data.cart_count !== undefined) {
+                const cartLink = document.querySelector('a[href*="/cart"]');
+                if (cartLink) {
+                    let cartBadge = cartLink.querySelector('span.absolute');
+                    if (!cartBadge) {
+                        // Створюємо badge, якщо його немає
+                        cartBadge = document.createElement('span');
+                        cartBadge.className = 'absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-gradient-to-r from-red-500 via-pink-500 to-yellow-400 text-white text-xs font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center shadow-lg border-2 border-white text-[10px] sm:text-xs';
+                        cartLink.appendChild(cartBadge);
+                    }
+                    cartBadge.textContent = data.cart_count;
+                    cartBadge.style.display = 'flex';
+                }
+            }
+            
+            // Показуємо повідомлення
+            if (typeof showToast === 'function') {
+                showToast(data.message, 'success');
+            }
+            
+            // Повертаємо кнопку до нормального стану через 2 секунди
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                    btn.classList.remove('from-green-600', 'to-green-700');
+                    btn.classList.add('from-green-500', 'to-emerald-600');
+                btn.disabled = false;
+            }, 2000);
+        } else {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            if (typeof showToast === 'function') {
+                showToast(data.message || 'Помилка додавання товару', 'error');
+            } else {
+                alert(data.message || 'Помилка додавання товару');
+            }
+        }
+    })
+    .catch(error => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        console.error('Помилка додавання до кошика:', error);
+        // Не показуємо помилку, якщо це була авторизація (вже оброблено вище)
+        if (!error.message || !error.message.includes('авторизація')) {
+            if (typeof showToast === 'function') {
+                showToast('Помилка з\'єднання з сервером. Спробуйте ще раз.', 'error');
+            } else {
+                alert('Помилка з\'єднання з сервером. Спробуйте ще раз.');
+            }
+        }
+    });
+}
 </script>
 {% endblock %}
 
